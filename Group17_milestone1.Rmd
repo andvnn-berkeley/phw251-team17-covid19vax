@@ -1,0 +1,39 @@
+---
+title: 'Group 17 Milestone #1'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Question #1: Project option selection
+Our group has decided to work on Scenario #2, COVID-Vaccination Update in California 
+
+Question #2: Create git repository Share a link to your group’s git repository
+https://github.com/andvnn-berkeley/phw251-team17
+
+Question #3: Roles and responsibilities
+Andrew: Meeting minutes 
+Jessica: Meeting invites 
+Saira: Contact teaching team 
+
+Question #4:Team's preferred communication method 
+Text message/email 
+
+Question #5:Team's preferred meeting times and frequency 
+Meeting Days: Thursdays; weekly
+Time: 5-6PM 
+
+Question #6:Team's preferred method for tracking progress
+-Keeping minutes will help with developing action items 
+-Use GitHub repository 
+
+Question #7:Point person for contacting course facilitators with questions
+Point person for submitting all milestones
+-Saira will be the point person for contacting course facilitators with questions
+-Andrew will be the point person for submitting all milestones 
+
+Question #8: Meeting with instructor during Week 5
+-Thursday, Sept 23 5-6PM
+
