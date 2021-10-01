@@ -28,12 +28,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
     The group statement and question relates to exploring, analyzing, and visualizing vaccination rates at county level and to explore if there is a correlation between age and vaccination rate. These two described datasets have necessary fields to support these analyses by including vaccination information at the ZIP level and county demographic data. 
 
-***Load libraries
+**Load libraries**
 ```{r load libraries}
 library(tidyverse)
+library(lubridate)
 ```
 
-***Import Statement
+**Import Statement**
 
 ```{r import statement}
 file_path_vax <- "https://data.chhs.ca.gov/dataset/ead44d40-fd63-4f9f-950a-3b0111074de8/resource/ec32eece-7474-4488-87f0-6e91cb577458/download/covid19vaccinesbyzipcode_test.csv"
@@ -49,7 +50,7 @@ county <- county_temp %>% select(c("name", "pop2012", "med_age"))
 head(vax)
 head(county)
 ```
-***Determine data types
+**Determine data types**
 
 ```{r data types}
 print("These are the data types for the vaccination dataset:")
@@ -59,12 +60,11 @@ print("These are the datatypes for the county demographics dataset:")
 sapply(county, class)
 
 ```
-***Identifying desired type/format for each data
+**Identifying desired type/format for each data**
 
 as_of_date: character -> date
 vaccine_equity_metric_quartile: integer -> factor
 ```{r}
-library(lubridate)
 vax$as_of_date <- as_date(vax$as_of_date)
 class(vax$as_of_date)
 
@@ -72,16 +72,18 @@ vax$vaccine_equity_metric_quartile <- as.factor(vax$vaccine_equity_metric_quarti
 class(vax$vaccine_equity_metric_quartile)
 ```
 
-***Basic descriptives of data elements
+**Basic descriptives of data elements**
 
 ```{r basic descriptives}
 
-print("ZIP Codes: 5-character numeric entry for each California ZCTA, one each.")
+print("Here are the simple frequencies for the county and vaccine equity metric (by quartile) variables.")
 
-table(vax$county)
-table(vax$vaccine_equity_metric_quartile) 
-table(county$name)
+table(vax$county) #how many ZIP code time entries exist in each county
+table(vax$vaccine_equity_metric_quartile) # ZIP code time entries categorized by vaccine equity metric (by quartile) 
+table(county$name) #how many counties exist in the ca_county_demographic dataset
 
+
+print("Here are summary statistics for numeric variables of interest.")
 summary(vax$age12_plus_population)
 summary(vax$persons_fully_vaccinated)
 summary(vax$persons_partially_vaccinated)
