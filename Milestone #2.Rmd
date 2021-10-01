@@ -36,12 +36,14 @@ library(tidyverse)
 ***Import Statement
 
 ```{r import statement}
-setwd("/Volumes/GoogleDrive-100628492847984918682/My Drive/Fall Semester 2021/PH251 - R for Public Health/PHW251 - Group 17")
+file_path_vax <- "https://data.chhs.ca.gov/dataset/ead44d40-fd63-4f9f-950a-3b0111074de8/resource/ec32eece-7474-4488-87f0-6e91cb577458/download/covid19vaccinesbyzipcode_test.csv"
+file_path_county <- "https://raw.githubusercontent.com/Averysaurus/reproducable_examples-/main/ca_county_demographics.csv"
 
-vax_temp <- read.csv("./datasets/cov_vax_admin.csv")
-county_temp <- read.csv("./datasets/ca_county_demographics.csv")
+vax_temp <- read.csv(file_path_vax)
+county_temp <- read.csv(file_path_county)
 
-vax <- vax_temp %>% select(-c("X1", "local_health_jurisdiction", "vem_source", "redacted"))
+str(vax_temp)
+vax <- vax_temp %>% select(-c("local_health_jurisdiction", "vem_source", 10:13))
 county <- county_temp %>% select(c("name", "pop2012", "med_age"))
 
 head(vax)
@@ -61,7 +63,14 @@ sapply(county, class)
 
 as_of_date: character -> date
 vaccine_equity_metric_quartile: integer -> factor
+```{r}
+library(lubridate)
+vax$as_of_date <- as_date(vax$as_of_date)
+class(vax$as_of_date)
 
+vax$vaccine_equity_metric_quartile <- as.factor(vax$vaccine_equity_metric_quartile)
+class(vax$vaccine_equity_metric_quartile)
+```
 
 ***Basic descriptives of data elements
 
@@ -69,7 +78,14 @@ vaccine_equity_metric_quartile: integer -> factor
 
 print("ZIP Codes: 5-character numeric entry for each California ZCTA, one each.")
 
-frequency(vax$county, vax$vaccine_equity_metric_quartile, county$name)
+table(vax$county)
+table(vax$vaccine_equity_metric_quartile) 
+table(county$name)
 
-summary(c(vax$age12_plus_population, vax$persons_fully_vaccinated, vax$persons_partially_vaccinated, county$pop2012, county$med_age))
+summary(vax$age12_plus_population)
+summary(vax$persons_fully_vaccinated)
+summary(vax$persons_partially_vaccinated)
+summary(county$pop2012)
+summary(county$med_age)
+```
 
