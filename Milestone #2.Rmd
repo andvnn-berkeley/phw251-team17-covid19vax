@@ -1,0 +1,75 @@
+---
+title: 'PHW251 Team Project: Milestone #2'
+subtitle: 'Scenario Two: COVID Vaccination Progress'
+author: "Saira Mayet, Jessica Pak, Andrew Nguyen"
+date: "9/28/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Description of dataset**
+
+- What is the data source?
+
+
+    There are two datasets of interest: one describing COVID-19 vaccine administration across the state of california, sourced from the California Open Data Portal ("cov_vax_admin.csv"). Fields include date, ZIP code, county, and raw counts of vaccination status, amongst other population information. The dataset spans January 5th, 2021, to September 21st, 2021. 
+    
+    The other describes demographics (e.g. population, race/ethnicity, age, household size, etc.) for each California county, updated to 2012. This dataset was rehosted on Avery Richards' GitHub, and is sourced from Census Data.
+    
+    
+- How does the dataset relate to the group statement and question?
+
+    
+    Problem statement: We are monitoring the state level COVID-19 vaccination rates among counties in California and in relation to age.  
+    Question: Is there any correlation between median age and vaccinated person prevalence on the county level?
+
+    The group statement and question relates to exploring, analyzing, and visualizing vaccination rates at county level and to explore if there is a correlation between age and vaccination rate. These two described datasets have necessary fields to support these analyses by including vaccination information at the ZIP level and county demographic data. 
+
+***Load libraries
+```{r load libraries}
+library(tidyverse)
+```
+
+***Import Statement
+
+```{r import statement}
+setwd("/Volumes/GoogleDrive-100628492847984918682/My Drive/Fall Semester 2021/PH251 - R for Public Health/PHW251 - Group 17")
+
+vax_temp <- read.csv("./datasets/cov_vax_admin.csv")
+county_temp <- read.csv("./datasets/ca_county_demographics.csv")
+
+vax <- vax_temp %>% select(-c("X1", "local_health_jurisdiction", "vem_source", "redacted"))
+county <- county_temp %>% select(c("name", "pop2012", "med_age"))
+
+head(vax)
+head(county)
+```
+***Determine data types
+
+```{r data types}
+print("These are the data types for the vaccination dataset:")
+sapply(vax, class)
+
+print("These are the datatypes for the county demographics dataset:")
+sapply(county, class)
+
+```
+***Identifying desired type/format for each data
+
+as_of_date: character -> date
+vaccine_equity_metric_quartile: integer -> factor
+
+
+***Basic descriptives of data elements
+
+```{r basic descriptives}
+
+print("ZIP Codes: 5-character numeric entry for each California ZCTA, one each.")
+
+frequency(vax$county, vax$vaccine_equity_metric_quartile, county$name)
+
+summary(c(vax$age12_plus_population, vax$persons_fully_vaccinated, vax$persons_partially_vaccinated, county$pop2012, county$med_age))
+
