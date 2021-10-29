@@ -8,17 +8,36 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(lubridate)
+```
+
+**Import Statement**
+
+```{r import statement}
+
+# from Milestone #2
+file_path_vax <- "https://data.chhs.ca.gov/dataset/ead44d40-fd63-4f9f-950a-3b0111074de8/resource/ec32eece-7474-4488-87f0-6e91cb577458/download/covid19vaccinesbyzipcode_test.csv"
+file_path_county <- "https://raw.githubusercontent.com/Averysaurus/reproducable_examples-/main/ca_county_demographics.csv"
+
+vax_temp <- read.csv(file_path_vax)
+county_temp <- read.csv(file_path_county)
+
+# subset data to only include variables of interest
+vax <- vax_temp %>% select(-c("local_health_jurisdiction", "vem_source", 10:13))
+county <- county_temp %>% select(c("name", "med_age"))
 ```
 
 **1. Subset data, as needed:**
 
-Partial subsetting of data was already performed in Milestone #2
+Partial subsetting of data was already performed in Milestone #2 (see import statement above).
 We are keeping the following variables in these datasets:
 
     - County: name, median age
     - Vax: date, ZIP , county, vaccine equity quartile, population 12+, number person fully vaccinated, number partially vaccinated
 
-Now we will subset for the latest date of data, as this is a continually-updated dataset.
+Now we will subset for the latest date of data, as the CDPH's "COVID-19 Vaccines Administered by Zip Code" excel sheet is a continually-updated dataset.
 ```{r subset latest data}
 vax_latest <- vax %>%
   mutate(date = as_date(as_of_date)) %>%
@@ -31,8 +50,10 @@ vax_latest <- vax %>%
 
 Clean variables:
 
+    - Mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in dataset
     - Percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
     - Percent eligible population fully vaccination = # of persons fully vaccinated / population 12+ (at county level)
+    - Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county". 
 
 
 Since our final clean dataset needs to undergo mean imputation before our new variables are created, we will perform that first:
@@ -51,4 +72,13 @@ vax_latest <- vax_latest %>%
 
 ```
 
+Creating new variables, percent fully vaccinated and percent partially vaccinated, in the vaccination dataset:
+```{r}
+
+```
+
+Merging both county and vax_latest dataset:
+```{r}
+
+```
 
