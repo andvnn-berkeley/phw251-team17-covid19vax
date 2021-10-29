@@ -1,0 +1,54 @@
+---
+title: 'PHW251 Team Project: Milestone #2'
+subtitle: 'Scenario Two: COVID Vaccination Progress'
+author: "Saira Mayet, Jessica Pak, Andrew Nguyen"
+date: "10/28/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**1. Subset data, as needed:**
+
+Partial subsetting of data was already performed in Milestone #2
+We are keeping the following variables in these datasets:
+
+    - County: name, median age
+    - Vax: date, ZIP , county, vaccine equity quartile, population 12+, number person fully vaccinated, number partially vaccinated
+
+Now we will subset for the latest date of data, as this is a continually-updated dataset.
+```{r subset latest data}
+vax_latest <- vax %>%
+  mutate(date = as_date(as_of_date)) %>%
+  filter(date == max(date))
+```
+
+
+\newpage    
+**2. Create new variables needed for analysis**
+
+Clean variables:
+
+    - Percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
+    - Percent eligible population fully vaccination = # of persons fully vaccinated / population 12+ (at county level)
+
+
+Since our final clean dataset needs to undergo mean imputation before our new variables are created, we will perform that first:
+
+```{r mean imputation}
+
+vax_latest <- vax_latest %>%
+  filter(!is.na(persons_fully_vaccinated)) %>%
+  group_by(county) %>%
+  mutate(persons_fully_county = mean(persons_fully_vaccinated),
+            persons_partially_county = mean(persons_partially_vaccinated)) %>%
+  ungroup() %>%
+  mutate(
+    persons_fully_vaccinated = ifelse(is.na(persons_fully_vaccinated), persons_fully_county, persons_fully_vaccinated),
+    persons_partially_vaccinated = ifelse(is.na(persons_partially_vaccinated), persons_partially_county, persons_partially_vaccinated))
+
+```
+
+

@@ -45,7 +45,7 @@ county_temp <- read.csv(file_path_county)
 
 str(vax_temp)
 vax <- vax_temp %>% select(-c("local_health_jurisdiction", "vem_source", 10:13))
-county <- county_temp %>% select(c("name", "pop2012", "med_age"))
+county <- county_temp %>% select(c("name", "med_age"))
 
 head(vax)
 head(county)
