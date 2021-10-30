@@ -50,32 +50,36 @@ vax_latest <- vax %>%
 
 Clean variables:
 
-    - Mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in dataset
-    - Percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
-    - Percent eligible population fully vaccination = # of persons fully vaccinated / population 12+ (at county level)
-    - Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county". 
+    - Create variable: percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
+    - Create variable: percent eligible population fully vaccinated = # of persons fully vaccinated / population 12+ (at county level)
+    - Replace NA via mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in zip-code
+    - Remove variables: some values for 12+ population does not make sense (values equal 0 or are smaller than the number of people fully/partially vaccinated)
+    - Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county"
+    - Rename variables, re-select variables to keep for final clean dataset
 
 
-Since our final clean dataset needs to undergo mean imputation before our new variables are created, we will perform that first:
+We will remove missing values from fully/partially vaccinated persons columns by replacing NAs with the mean proportion vaccinated values calculated at the county level (mean imputation) to create our new fully/partially vaccinated percentage variables.
 
 ```{r mean imputation}
 
 vax_latest <- vax_latest %>% 
   group_by(county) %>%
-  mutate(countyfull = sum(persons_fully_vaccinated, na.rm = T)/sum(age12_plus_population),
-         countypartial = sum(persons_partially_vaccinated, na.rm = T)/sum(age12_plus_population)) %>% 
+  mutate(
+    countyfull = round(((sum(persons_fully_vaccinated, na.rm = T)/sum(age12_plus_population))*100), digits = 2),
+    countypartial = round(((sum(persons_partially_vaccinated, na.rm = T)/sum(age12_plus_population))*100), digits = 2)
+    ) %>% 
   ungroup() %>% 
-  mutate(percent_full = persons_fully_vaccinated/age12_plus_population,
-         percent_partial = persons_partially_vaccinated/age12_plus_population) %>% 
+  mutate(
+    percent_full = round((persons_fully_vaccinated/age12_plus_population)*100, digits = 2),
+    percent_partial = round((persons_partially_vaccinated/age12_plus_population)*100, digits = 2)
+    ) %>% 
   mutate(percent_full = ifelse(is.na(percent_full), countyfull, percent_full),
          percent_partial = ifelse(is.na(percent_partial), countypartial, percent_partial))
 
+# from here need to remove rows with 12+ population numbers that are 0 or smaller than vaccinated people numbers, calculate county averages again (this time without NAs), remove unnecessary columns, merge with county dataset, and rename column names
 ```
 
-Creating new variables, percent fully vaccinated and percent partially vaccinated, in the vaccination dataset:
-```{r}
 
-```
 
 Merging both county and vax_latest dataset:
 ```{r}
