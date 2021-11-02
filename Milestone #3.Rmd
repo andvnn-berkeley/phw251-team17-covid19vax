@@ -1,5 +1,5 @@
 ---
-title: 'PHW251 Team Project: Milestone #2'
+title: 'PHW251 Team Project: Milestone #3'
 subtitle: 'Scenario Two: COVID Vaccination Progress'
 author: "Saira Mayet, Jessica Pak, Andrew Nguyen"
 date: "10/28/2021"
@@ -41,7 +41,8 @@ Now we will subset for the latest date of data, as the CDPH's "COVID-19 Vaccines
 ```{r subset latest data}
 vax_latest <- vax %>%
   mutate(date = as_date(as_of_date)) %>%
-  filter(date == max(date))
+  filter(date == max(date)) %>%
+  select( - as_of_date)
 ```
 
 
@@ -59,17 +60,58 @@ Clean variables:
 Since our final clean dataset needs to undergo mean imputation before our new variables are created, we will perform that first:
 
 ```{r mean imputation}
-
-vax_latest <- vax_latest %>%
-  filter(!is.na(persons_fully_vaccinated)) %>%
+  
+vax_latest <- vax_latest %>% 
   group_by(county) %>%
-  mutate(persons_fully_county = mean(persons_fully_vaccinated),
-            persons_partially_county = mean(persons_partially_vaccinated)) %>%
-  ungroup() %>%
   mutate(
-    persons_fully_vaccinated = ifelse(is.na(persons_fully_vaccinated), persons_fully_county, persons_fully_vaccinated),
-    persons_partially_vaccinated = ifelse(is.na(persons_partially_vaccinated), persons_partially_county, persons_partially_vaccinated))
+    countyfull = round(((sum(persons_fully_vaccinated, na.rm = T)/sum(age12_plus_population))*100), digits = 2),
+    countypartial = round(((sum(persons_partially_vaccinated, na.rm = T)/sum(age12_plus_population))*100), digits = 2)
+    ) %>% 
+  ungroup() %>% 
+  mutate(
+    percent_full = round((persons_fully_vaccinated/age12_plus_population)*100, digits = 2),
+    percent_partial = round((persons_partially_vaccinated/age12_plus_population)*100, digits = 2)
+    ) %>% 
+  mutate(percent_full = ifelse(is.na(percent_full), countyfull, percent_full),
+         percent_partial = ifelse(is.na(percent_partial), countypartial, percent_partial))
 
+
+#remove data from ZIPs w/ higher positive tests than total population
+
+vax_temp <- vax_latest %>%
+  mutate(partial_count = ifelse(persons_fully_vaccinated > age12_plus_population, NA, persons_partially_vaccinated),
+         partial_count = ifelse(persons_partially_vaccinated > age12_plus_population, NA, persons_partially_vaccinated),
+         fully_count = ifelse(persons_fully_vaccinated > age12_plus_population, NA, persons_fully_vaccinated),
+         eligible_pop = ifelse(persons_fully_vaccinated > age12_plus_population, NA, age12_plus_population))
+
+#aggregate counts & percentages by county 
+
+vax_temp <- vax_temp %>%
+  group_by(county) %>%
+  mutate(county_partial = sum(partial_count, na.rm = T) / sum(eligible_pop, na.rm = T),
+         county_fully = sum(fully_count, na.rm = T) / sum(eligible_pop, na.rm = T)) %>%
+  ungroup()
+
+#impute % on eligible population for ZIPs w/ missing vaccination counts (originally NA or removed b/c more than eligible population) + remove ZIPs that have 0 eligible population counts
+
+vax_temp <- vax_temp %>%
+  mutate(partial_count = round(ifelse(is.na(partial_count), county_partial * age12_plus_population, partial_count), 2),
+         fully_count = round(ifelse(is.na(fully_count), county_fully * age12_plus_population, fully_count), 2),
+         eligible_pop = age12_plus_population) %>%
+  filter(age12_plus_population != 0)
+
+#create new aggregate counts & percentages at county level
+
+vax_temp <- vax_temp %>%
+  group_by(county) %>%
+  mutate(county_partial_new = sum(partial_count, na.rm = T) / sum(eligible_pop, na.rm = T),
+         county_fully_new = sum(fully_count, na.rm =T) / sum(eligible_pop, na.rm = T),
+         county_eligible_pop = sum(eligible_pop)) %>%
+  ungroup()
+
+vax_aggregate <- vax_temp %>%
+  distinct(county, .keep_all = T) %>%
+  select(county, vaccine_equity_metric_quartile, county_partial_new, county_fully_new, county_eligible_pop)
 ```
 
 Creating new variables, percent fully vaccinated and percent partially vaccinated, in the vaccination dataset:
@@ -86,7 +128,7 @@ Merging both county and vax_latest dataset:
 **4. Data dictionary based on clean dataset** 
 
 
-**Variable Name** | **Defintion** 
+**Variable Name** | **Definition** 
 --------------|-----------
 Latest Date   | Date of latest data available for vaccination statistics
 County Name   | Names of the 58 counties
