@@ -25,7 +25,7 @@ vax_temp <- read.csv(file_path_vax)
 county_temp <- read.csv(file_path_county)
 
 # subset data to only include variables of interest
-vax <- vax_temp %>% select(-c("local_health_jurisdiction", "vem_source", 10:13))
+vax <- vax_temp %>% select(-c("vaccine_equity_metric_quartile", "local_health_jurisdiction", "vem_source", 10:13))
 county <- county_temp %>% select(c("name", "med_age"))
 ```
 
@@ -51,16 +51,22 @@ vax_latest <- vax %>%
 
 Clean variables:
 
-    - Mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in dataset
-    - Percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
-    - Percent eligible population fully vaccination = # of persons fully vaccinated / population 12+ (at county level)
-    - Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county". 
+    - Create variable: percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
+    - Create variable: percent eligible population fully vaccinated = # of persons fully vaccinated / population 12+ (at county level)
+    - Replace NA via mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in zip-code
+    - Remove variables: some values for 12+ population does not make sense (values equal 0 or are smaller than the number of people fully/partially vaccinated)
+    - Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county"
+    - Rename variables, re-select variables to keep for final clean dataset
 
 
-Since our final clean dataset needs to undergo mean imputation before our new variables are created, we will perform that first:
+We will remove missing values from fully/partially vaccinated persons columns by replacing NAs with the mean proportion vaccinated values calculated at the county level (mean imputation) to create our new fully/partially vaccinated percentage variables.
 
 ```{r mean imputation}
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> d485395190243688a19145d39bba09d1690ff343
 vax_latest <- vax_latest %>% 
   group_by(county) %>%
   mutate(
@@ -74,6 +80,7 @@ vax_latest <- vax_latest %>%
     ) %>% 
   mutate(percent_full = ifelse(is.na(percent_full), countyfull, percent_full),
          percent_partial = ifelse(is.na(percent_partial), countypartial, percent_partial))
+<<<<<<< HEAD
 
 
 #remove data from ZIPs w/ higher positive tests than total population
@@ -112,12 +119,13 @@ vax_temp <- vax_temp %>%
 vax_aggregate <- vax_temp %>%
   distinct(county, .keep_all = T) %>%
   select(county, vaccine_equity_metric_quartile, county_partial_new, county_fully_new, county_eligible_pop)
+=======
+
+# from here need to remove rows with 12+ population numbers that are 0 or smaller than vaccinated people numbers, calculate county averages again (this time without NAs), remove unnecessary columns, merge with county dataset, and rename column names
+>>>>>>> d485395190243688a19145d39bba09d1690ff343
 ```
 
-Creating new variables, percent fully vaccinated and percent partially vaccinated, in the vaccination dataset:
-```{r}
 
-```
 
 Merging both county and vax_latest dataset:
 ```{r}
