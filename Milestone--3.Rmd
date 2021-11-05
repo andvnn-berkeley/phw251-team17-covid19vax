@@ -3,11 +3,13 @@ title: 'PHW251 Team Project: Milestone #3'
 subtitle: 'Scenario Two: COVID Vaccination Progress'
 author: "Saira Mayet, Jessica Pak, Andrew Nguyen"
 date: "10/28/2021"
-output: pdf_document
+output:
+   pdf_document:
+     latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=40), tidy=TRUE)
 
 library(tidyverse)
 library(lubridate)
@@ -27,17 +29,24 @@ vax_temp <- read.csv(file_path_vax)
 county_temp <- read.csv(file_path_county)
 
 # subset data to only include variables of interest
-vax <- vax_temp %>% select(-c("vaccine_equity_metric_quartile", "local_health_jurisdiction", "vem_source", 10:13))
-county <- county_temp %>% select(c("name", "med_age"))
+vax <- vax_temp %>% 
+  select(-c("vaccine_equity_metric_quartile", 
+            "local_health_jurisdiction", 
+            "vem_source", 
+            10:13))
+county <- county_temp %>% 
+  select(c("name", 
+           "med_age"))
 ```
-
+\newpage
 **1. Subset data, as needed:**
 
 Partial subsetting of data was already performed in Milestone #2 (see import statement above).
+
 We are keeping the following variables in these datasets:
 
-    - County: name, median age
-    - Vax: date, ZIP , county, vaccine equity quartile, population 12+, number person fully vaccinated, number partially vaccinated
+- County: name, median age
+- Vax: date, ZIP , county, vaccine equity quartile, population 12+, number person fully vaccinated, number partially vaccinated
 
 Now we will subset for the latest date of data, as the CDPH's "COVID-19 Vaccines Administered by Zip Code" excel sheet is a continually-updated dataset.
 ```{r subset latest data}
@@ -53,10 +62,10 @@ vax_latest <- vax %>%
 
 Clean variables:
 
-    - Mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in dataset
-    - Percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
-    - Percent eligible population fully vaccination = # of persons fully vaccinated / population 12+ (at county level)
-    - Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county". 
+- Mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in dataset
+- Percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
+- Percent eligible population fully vaccination = # of persons fully vaccinated / population 12+ (at county level)
+- Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county". 
 
 
 Since our final clean dataset needs to undergo mean imputation before our new variables are created, we will perform that first:
@@ -67,30 +76,44 @@ Since our final clean dataset needs to undergo mean imputation before our new va
 
 vax_temp <- vax_latest %>%
   group_by(county) %>%
-  mutate(county_partial = sum(persons_partially_vaccinated, na.rm = T)/sum(age12_plus_population, na.rm =T),
-         county_fully = sum(persons_fully_vaccinated, na.rm = T)/sum(age12_plus_population, na.rm = T)) %>%
+  mutate(county_partial = 
+           sum(persons_partially_vaccinated, na.rm = T)/
+           sum(age12_plus_population, na.rm =T),
+         county_fully = 
+           sum(persons_fully_vaccinated, na.rm = T)/
+           sum(age12_plus_population, na.rm = T)) %>%
   ungroup()
 
 #mean imputation: for ZIPs that have eligible population counts but lack vaccination numbers
 
 vax_temp <- vax_temp %>%
-  mutate(persons_partially_vaccinated_2 = ifelse(is.na(persons_partially_vaccinated), age12_plus_population*county_partial, persons_partially_vaccinated),
-         persons_fully_vaccinated_2 = ifelse(is.na(persons_fully_vaccinated), age12_plus_population*county_fully, persons_fully_vaccinated))
+  mutate(persons_partially_vaccinated_2 = 
+           ifelse(is.na(persons_partially_vaccinated), age12_plus_population*county_partial, persons_partially_vaccinated),
+         persons_fully_vaccinated_2 = 
+           ifelse(is.na(persons_fully_vaccinated), age12_plus_population*county_fully, persons_fully_vaccinated))
 
 #make second county-level aggregate with imputed data + original data
 
 vax_temp <- vax_temp %>%
   group_by(county) %>%
-  mutate(county_partial_2 = sum(persons_partially_vaccinated, na.rm = T)/sum(age12_plus_population, na.rm =T),
-         county_fully_2 = sum(persons_fully_vaccinated, na.rm = T)/sum(age12_plus_population, na.rm = T),
-         county_eligible_pop = sum(age12_plus_population, na.rm = T)) %>%
+  mutate(county_partial_2 = 
+           sum(persons_partially_vaccinated, na.rm = T)/
+           sum(age12_plus_population, na.rm =T),
+         county_fully_2 = 
+           sum(persons_fully_vaccinated, na.rm = T)/
+           sum(age12_plus_population, na.rm = T),
+         county_eligible_pop = 
+           sum(age12_plus_population, na.rm = T)) %>%
   ungroup()
 
 #create new dataset with only one entry per county
 
 vax_aggregate <- vax_temp %>%
   distinct(county, .keep_all = T) %>%
-  select(county, county_partial_2, county_fully_2, county_eligible_pop) %>%
+  select(county, 
+         county_partial_2, 
+         county_fully_2, 
+         county_eligible_pop) %>%
   filter(county_partial_2 != 0)
 ```
 
@@ -115,7 +138,6 @@ Percent partially vaccinated | number of eligible people partially vaccination (
 Eligible Population | total number of people eligible to receive vaccinations (age 12+)
 
 \newpage
-
 **5. Table with descriptive statistics with 4 data elements**
 
 ```{r table}
@@ -133,9 +155,22 @@ clean_data <- data %>%
   arrange(County)
 
 
-kable(clean_data, booktabs = T, col.names = c("County Name", "Partially Vaccinated Rate", "Fully Vaccinated Rate", "Total Eligible Population", "Median Age"), align = "c", caption = "Vaccination Rates for California Counties", format.args=list(big.mark=",")) %>% 
-  add_header_above(c("California"= 1,"6.97"=1,"62.8"=1,"	
-33,330,578"=1, "38"=1)) %>% 
+kable(clean_data, 
+      booktabs = T, 
+      col.names = c("County Name", 
+                    "Partially Vaccinated Rate", 
+                    "Fully Vaccinated Rate", 
+                    "Total Eligible Population", 
+                    "Median Age"), 
+      align = "c", 
+      caption = "Vaccination Rates for California Counties",
+      format.args=list(big.mark=",")) %>% 
+      add_header_above(c("California"= 1,
+      "6.97"=1,
+      "62.8"=1,
+      "33,330,578"=1,
+      "38"=1),
+      bold = T) %>%
   column_spec(1, bold = T)
   
 ```
