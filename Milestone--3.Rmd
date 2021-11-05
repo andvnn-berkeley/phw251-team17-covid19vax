@@ -19,7 +19,7 @@ library(kableExtra)
 
 **Import Statement**
 
-```{r import statement, include = FALSE}
+```{r import statement}
 
 # from Milestone #2
 file_path_vax <- 
@@ -91,10 +91,12 @@ vax_temp <- vax_latest %>%
 vax_temp <- vax_temp %>%
   mutate(persons_partially_vaccinated_2 = 
            ifelse(is.na(persons_partially_vaccinated), 
-                  age12_plus_population*county_partial, persons_partially_vaccinated),
+                  age12_plus_population*county_partial,
+                  persons_partially_vaccinated),
          persons_fully_vaccinated_2 = 
            ifelse(is.na(persons_fully_vaccinated),
-                  age12_plus_population*county_fully, persons_fully_vaccinated))
+                  age12_plus_population*county_fully, 
+                  persons_fully_vaccinated))
 
 #make second county-level aggregate with imputed data + original data
 
