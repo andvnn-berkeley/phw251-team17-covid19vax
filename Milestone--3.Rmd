@@ -11,11 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(lubridate)
+library(knitr)
+library(kableExtra)
 ```
 
 **Import Statement**
 
-```{r import statement}
+```{r import statement, include = FALSE}
 
 # from Milestone #2
 file_path_vax <- "https://data.chhs.ca.gov/dataset/ead44d40-fd63-4f9f-950a-3b0111074de8/resource/ec32eece-7474-4488-87f0-6e91cb577458/download/covid19vaccinesbyzipcode_test.csv"
@@ -25,7 +27,7 @@ vax_temp <- read.csv(file_path_vax)
 county_temp <- read.csv(file_path_county)
 
 # subset data to only include variables of interest
-vax <- vax_temp %>% select(-c("local_health_jurisdiction", "vem_source", 10:13))
+vax <- vax_temp %>% select(-c("vaccine_equity_metric_quartile", "local_health_jurisdiction", "vem_source", 10:13))
 county <- county_temp %>% select(c("name", "med_age"))
 ```
 
@@ -94,12 +96,10 @@ vax_aggregate <- vax_temp %>%
 
 Merging both county and vax_latest dataset:
 ```{r}
-
 county <- county %>%
   rename(county = name)
 
-data <- left_join(vax_aggregate, county, by="county")
-
+data <- left_join(vax_aggregate, county, by="county") 
 ```
 
 \newpage 
@@ -108,9 +108,35 @@ data <- left_join(vax_aggregate, county, by="county")
 
 **Variable Name** | **Definition** 
 --------------|-----------
-Latest Date   | Date of latest data available for vaccination statistics
 County Name   | Names of the 58 counties
 Median Age    | Median age of population per county as recorded by United States American Community Survey (ACS) data.
 Percentage fully vaccinated | number of eligible people fully vaccinated (2+ doses for mRNA vaccine, 1 dose for adenovirus vaccine) divided by number of persons 12+ 
-Percent partially vaccinated | number of eligible people partially vaccination (1 dose for mRNA vaccine) divide by number of persons 12+
+Percent partially vaccinated | number of eligible people partially vaccination (1 dose for mRNA vaccine) divide by number of persons 12+ 
+Eligible Population | total number of people eligible to receive vaccinations (age 12+)
+
 \newpage
+
+**5. Table with descriptive statistics with 4 data elements**
+
+```{r table}
+
+clean_data <- data %>% 
+  rename(County = county,
+         Partially_Vax_Rate = county_partial_2,
+         Fully_Vax_Rate = county_fully_2,
+         Eligible_Population = county_eligible_pop,
+         Median_Age = med_age) %>% 
+  mutate(Partially_Vax_Rate = round((Partially_Vax_Rate*100), digits =2),
+         Fully_Vax_Rate = round((Fully_Vax_Rate*100), digits = 2),
+         Eligible_Population = round(Eligible_Population, digits = 0),
+         Median_Age = round(Median_Age, digits = 0)) %>% 
+  arrange(County)
+
+
+kable(clean_data, booktabs = T, col.names = c("County Name", "Partially Vaccinated Rate", "Fully Vaccinated Rate", "Total Eligible Population", "Median Age"), align = "c", caption = "Vaccination Rates for California Counties", format.args=list(big.mark=",")) %>% 
+  add_header_above(c("California"= 1,"6.97"=1,"62.8"=1,"	
+33,330,578"=1, "38"=1)) %>% 
+  column_spec(1, bold = T)
+  
+```
+
