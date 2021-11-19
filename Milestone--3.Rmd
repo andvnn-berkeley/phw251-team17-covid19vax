@@ -34,8 +34,9 @@ county_temp <- read.csv(file_path_county)
 vax <- vax_temp %>% 
   select(-c("vaccine_equity_metric_quartile", 
             "local_health_jurisdiction", 
-            "vem_source", 
-            10:13))
+            "vem_source",
+            "age12_plus_population",
+            11:14))
 county <- county_temp %>% 
   select(c("name", 
            "med_age"))
@@ -65,8 +66,8 @@ vax_latest <- vax %>%
 Clean variables:
 
 - Mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in dataset
-- Percent eligible population partially vaccinated = # of persons partially vaccinated / population 12+ (at county level)
-- Percent eligible population fully vaccination = # of persons fully vaccinated / population 12+ (at county level)
+- Percent eligible population partially vaccinated = # of persons partially vaccinated / population 5+ (at county level)
+- Percent eligible population fully vaccination = # of persons fully vaccinated / population 5+ (at county level)
 - Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county". 
 
 
@@ -80,10 +81,10 @@ vax_temp <- vax_latest %>%
   group_by(county) %>%
   mutate(county_partial = 
            sum(persons_partially_vaccinated, na.rm = T)/
-           sum(age12_plus_population, na.rm =T),
+           sum(age5_plus_population, na.rm =T),
          county_fully = 
            sum(persons_fully_vaccinated, na.rm = T)/
-           sum(age12_plus_population, na.rm = T)) %>%
+           sum(age5_plus_population, na.rm = T)) %>%
   ungroup()
 
 #mean imputation: for ZIPs that have eligible population counts but lack vaccination numbers
@@ -91,11 +92,11 @@ vax_temp <- vax_latest %>%
 vax_temp <- vax_temp %>%
   mutate(persons_partially_vaccinated_2 = 
            ifelse(is.na(persons_partially_vaccinated), 
-                  age12_plus_population*county_partial,
+                  age5_plus_population*county_partial,
                   persons_partially_vaccinated),
          persons_fully_vaccinated_2 = 
            ifelse(is.na(persons_fully_vaccinated),
-                  age12_plus_population*county_fully, 
+                  age5_plus_population*county_fully, 
                   persons_fully_vaccinated))
 
 #make second county-level aggregate with imputed data + original data
@@ -104,12 +105,12 @@ vax_temp <- vax_temp %>%
   group_by(county) %>%
   mutate(county_partial_2 = 
            sum(persons_partially_vaccinated, na.rm = T)/
-           sum(age12_plus_population, na.rm =T),
+           sum(age5_plus_population, na.rm =T),
          county_fully_2 = 
            sum(persons_fully_vaccinated, na.rm = T)/
-           sum(age12_plus_population, na.rm = T),
+           sum(age5_plus_population, na.rm = T),
          county_eligible_pop = 
-           sum(age12_plus_population, na.rm = T)) %>%
+           sum(age5_plus_population, na.rm = T)) %>%
   ungroup()
 
 #create new dataset with only one entry per county
@@ -139,15 +140,14 @@ data <- left_join(vax_aggregate, county, by="county")
 --------------|-----------
 County Name   | Names of the 58 counties
 Median Age    | Median age of population per county as recorded by United States American Community Survey (ACS) data.
-Percentage fully vaccinated | number of eligible people fully vaccinated (2+ doses for mRNA vaccine, 1 dose for adenovirus vaccine) divided by number of persons 12+ 
-Percent partially vaccinated | number of eligible people partially vaccination (1 dose for mRNA vaccine) divide by number of persons 12+ 
-Eligible Population | total number of people eligible to receive vaccinations (age 12+)
+Percentage fully vaccinated | number of eligible people fully vaccinated (2+ doses for mRNA vaccine, 1 dose for adenovirus vaccine) divided by number of persons 5+ 
+Percent partially vaccinated | number of eligible people partially vaccination (1 dose for mRNA vaccine) divide by number of persons 5+ 
+Eligible Population | total number of people eligible to receive vaccinations (age 5+)
 
 \newpage
-
 **5. Table with descriptive statistics with 4 data elements**
 
-```{r table}
+```{r table data setup}
 # final clean data
 clean_data <- data %>% 
   rename(County = county,
@@ -160,7 +160,11 @@ clean_data <- data %>%
          Eligible_Population = round(Eligible_Population, digits = 0),
          Median_Age = round(Median_Age, digits = 0)) %>% 
   arrange(County)
+```
 
+
+\newpage
+```{r kable}
 # table with descriptive statistics (averages calculated for CA as a whole) and 4 data elements
 kable(clean_data, 
       booktabs = T, 
@@ -177,6 +181,17 @@ kable(clean_data,
       "62.8"=1,
       "33,330,578"=1,
       "38"=1),
-      bold = T) 
+      bold = T) %>%
+      kable_styling(latex_options = c("striped", "scale_down"))
+```
+
+**4. Visualizations**
+
+```{r age vs. full vaccination rate plot}
+
+```
+
+```{r}
+
 ```
 
