@@ -1,0 +1,234 @@
+---
+title: 'PHW251 Team Project: Milestone #4'
+subtitle: 'Scenario Two: COVID Vaccination Progress'
+author: "Saira Mayet, Jessica Pak, Andrew Nguyen"
+date: "10/28/2021"
+output:
+   pdf_document:
+     latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=40), tidy = T)
+
+library(tidyverse)
+library(lubridate)
+library(knitr)
+library(kableExtra)
+library("sf")
+library("sp")
+library("spData")
+library("dplyr")
+library("ggplot2")
+library("USAboundaries")
+library("tmap")
+```
+
+**Import Statement**
+
+```{r import statement}
+
+# from Milestone #2
+file_path_vax <- 
+  "https://data.chhs.ca.gov/dataset/ead44d40-fd63-4f9f-950a-3b0111074de8/resource/ec32eece-7474-4488-87f0-6e91cb577458/download/covid19vaccinesbyzipcode_test.csv"
+file_path_county <- 
+  "https://raw.githubusercontent.com/Averysaurus/reproducable_examples-/main/ca_county_demographics.csv"
+
+vax_temp <- read.csv(file_path_vax)
+county_temp <- read.csv(file_path_county)
+
+# subset data to only include variables of interest
+vax <- vax_temp %>% 
+  select(-c("vaccine_equity_metric_quartile", 
+            "local_health_jurisdiction", 
+            "vem_source",
+            "age12_plus_population",
+            11:14))
+county <- county_temp %>% 
+  select(c("name", 
+           "med_age"))
+```
+\newpage
+**1. Subset data, as needed:**
+
+Partial subsetting of data was already performed in Milestone #2 (see import statement above).
+
+We are keeping the following variables in these datasets:
+
+- County: name, median age
+- Vax: date, ZIP , county, vaccine equity quartile, population 12+, number person fully vaccinated, number partially vaccinated
+
+Now we will subset for the latest date of data, as the CDPH's "COVID-19 Vaccines Administered by Zip Code" excel sheet is a continually-updated dataset.
+```{r subset latest data}
+vax_latest <- vax %>%
+  mutate(date = as_date(as_of_date)) %>%
+  filter(date == max(date)) %>%
+  select( - as_of_date)
+```
+
+
+\newpage    
+**2. Create new variables needed for analysis**
+
+Clean variables:
+
+- Mean imputation: county-level means of fully and partially vaccinated that will be used to replace NA values in dataset
+- Percent eligible population partially vaccinated = # of persons partially vaccinated / population 5+ (at county level)
+- Percent eligible population fully vaccination = # of persons fully vaccinated / population 5+ (at county level)
+- Merging relational data: county demographic dataset with vaccine administration dataset using key variable "county". 
+
+
+Since our final clean dataset needs to undergo mean imputation before our new variables are created, we will perform that first:
+
+```{r mean imputation}
+
+#aggregate county-level counts + %s for vaccination
+
+vax_temp <- vax_latest %>%
+  group_by(county) %>%
+  mutate(county_partial = 
+           sum(persons_partially_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm =T),
+         county_fully = 
+           sum(persons_fully_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm = T)) %>%
+  ungroup()
+
+#mean imputation: for ZIPs that have eligible population counts but lack vaccination numbers
+
+vax_temp <- vax_temp %>%
+  mutate(persons_partially_vaccinated_2 = 
+           ifelse(is.na(persons_partially_vaccinated), 
+                  age5_plus_population*county_partial,
+                  persons_partially_vaccinated),
+         persons_fully_vaccinated_2 = 
+           ifelse(is.na(persons_fully_vaccinated),
+                  age5_plus_population*county_fully, 
+                  persons_fully_vaccinated))
+
+#make second county-level aggregate with imputed data + original data
+
+vax_temp <- vax_temp %>%
+  group_by(county) %>%
+  mutate(county_partial_2 = 
+           sum(persons_partially_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm =T),
+         county_fully_2 = 
+           sum(persons_fully_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm = T),
+         county_eligible_pop = 
+           sum(age5_plus_population, na.rm = T)) %>%
+  ungroup()
+
+#create new dataset with only one entry per county
+
+vax_aggregate <- vax_temp %>%
+  distinct(county, .keep_all = T) %>%
+  select(county, 
+         county_partial_2, 
+         county_fully_2, 
+         county_eligible_pop) %>%
+  filter(county_partial_2 != 0)
+```
+
+Merging both county and vax_latest dataset:
+```{r}
+county <- county %>%
+  rename(county = name)
+
+data <- left_join(vax_aggregate, county, by="county") 
+```
+
+
+\newpage
+**4. Data visualization of data elements**
+
+```{r table data setup}
+# final clean data
+clean_data <- data %>% 
+  rename(County = county,
+         Partially_Vax_Rate = county_partial_2,
+         Fully_Vax_Rate = county_fully_2,
+         Eligible_Population = county_eligible_pop,
+         Median_Age = med_age) %>% 
+  mutate(Partially_Vax_Rate = round((Partially_Vax_Rate*100), digits =2),
+         Fully_Vax_Rate = round((Fully_Vax_Rate*100), digits = 2),
+         Eligible_Population = round(Eligible_Population, digits = 0),
+         Median_Age = round(Median_Age, digits = 0)) %>% 
+  arrange(County)
+```
+
+
+\newpage
+# Table of descriptive statistics
+```{r kable}
+# table with descriptive statistics (averages calculated for CA as a whole) and 4 data elements
+kable(clean_data, 
+      booktabs = T, 
+      col.names = c("County Name", 
+                    "Partially Vaccinated Rate", 
+                    "Fully Vaccinated Rate", 
+                    "Total Eligible Population", 
+                    "Median Age"), 
+      align = "c", 
+      caption = "Vaccination Rates for California Counties",
+      format.args=list(big.mark=",")) %>% 
+      add_header_above(c("California"= 1,
+      "6.97"=1,
+      "62.8"=1,
+      "33,330,578"=1,
+      "38"=1),
+      bold = T) %>%
+      kable_styling(latex_options = c("striped", "scale_down")) 
+```
+The table describes the partial vaccinated rate, fully vaccinated rate, total eligible population, and median age of each county in California. The summarized average rates, total eligible population, and median age for the entire state of California is calculated and presented at the top of the table. 
+
+
+\newpage
+# Scatterplot of Median Age vs Fully Vaccinated Rate
+```{r age vs. full vaccination rate plot}
+ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
+  geom_point() +
+  geom_smooth(col = "navy blue", size = 0.5) + 
+  scale_y_continuous(limits=c(0, 100)) +
+  labs(x= "Median age", y= "Rate(s) of full vaccination", title= "Percentage of Fully Vaccinated Californians by Median Age, 2021", caption="Data Source: California Department of Public Health")
+         
+```
+The scatterplot above shows the rate of fully vaccinated individuals stratified by median age of California residents, as measured from California Department of Public Health's latest online data repository for COVID-19. A trend line was fitted to follow the points on the plot, and a general trend of increasing fully vaccinated rates can be seen near the median age of 36-38.
+
+\newpage
+# Map of vaccination rates,  by County
+```{r Map}
+
+#get CA boundary with high definition
+#ca <- USAboundaries::us_states(resolution = "high", states = "CA")
+
+#CA county boundary
+ca_co <- USAboundaries::us_counties(resolution = "high", states = "CA") %>%
+  select(- state_name)
+
+#Join dataset with sf polygon
+clean_data_rename <- clean_data %>%
+  rename(name = County)
+
+ca_covid <- dplyr::left_join(clean_data_rename, ca_co, by = "name")
+
+#Make joined dataset into sf object
+ca_covid <- st_as_sf(ca_covid, sf_column_name = "geometry")
+
+#Create plot
+legend_title = " "
+tm_shape(ca_covid) + 
+  tm_fill(col = "Fully_Vax_Rate", 
+          title = legend_title) +
+  tm_compass(type = "8star", 
+             position = c("left", "bottom")) +
+  tm_layout(scale = 1, 
+            title = "Rates of full vaccination in California, by county",
+            frame.lwd = 0,
+            inner.margins = 0.1,
+            legend.position = c("right", "top")) +
+  tm_credits("Data Source: California Department of Health")
+```
+The map above shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each.
+
