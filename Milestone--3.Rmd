@@ -185,7 +185,7 @@ ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
   labs(x= "Median Age", y= "Full Vaccination Rate", title= "Percentage of Fully Vaccinated Californians by Median Age, 2021", caption="Data Source: California Department of Public Health")
          
 ```
-The scatterplot above shows the rate of fully vaccinated individuals stratified by median age in California by 
+The scatterplot above shows the rate of fully vaccinated individuals stratified by median age of California residents, as measured from California Department of Public Health's latest online data repository for COVID-19. A trend line was fitted to follow the points on the plot, and a general trend of increasing fully vaccinated rates can be seen near the median age of 36-38.
 
 \newpage
 # GIS Plotting by County (or bar graph by county)
