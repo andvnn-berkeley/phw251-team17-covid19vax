@@ -132,21 +132,11 @@ county <- county %>%
 data <- left_join(vax_aggregate, county, by="county") 
 ```
 
-\newpage 
-**4. Data dictionary based on clean dataset** 
-
-
-**Variable Name** | **Definition** 
---------------|-----------
-County Name   | Names of the 58 counties
-Median Age    | Median age of population per county as recorded by United States American Community Survey (ACS) data.
-Percentage fully vaccinated | number of eligible people fully vaccinated (2+ doses for mRNA vaccine, 1 dose for adenovirus vaccine) divided by number of persons 5+ 
-Percent partially vaccinated | number of eligible people partially vaccination (1 dose for mRNA vaccine) divide by number of persons 5+ 
-Eligible Population | total number of people eligible to receive vaccinations (age 5+)
 
 \newpage
-**5. Table with descriptive statistics with 4 data elements**
+**4. Data visualization of data elements**
 
+# Table of descriptive statistics
 ```{r table data setup}
 # final clean data
 clean_data <- data %>% 
@@ -185,8 +175,8 @@ kable(clean_data,
       kable_styling(latex_options = c("striped", "scale_down")) 
 ```
 
-**4. Visualizations**
-
+\newpage
+# Scatterplot of Median Age vs Fully Vaccinated Rate
 ```{r age vs. full vaccination rate plot}
 ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
   geom_point() +
@@ -195,7 +185,10 @@ ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
   labs(x= "Median Age", y= "Full Vaccination Rate", title= "Percentage of Fully Vaccinated Californians by Median Age, 2021", caption="Data Source: California Department of Public Health")
          
 ```
+The scatterplot above shows the rate of fully vaccinated individuals stratified by median age in California by 
 
+\newpage
+# GIS Plotting by County (or bar graph by county)
 ```{r}
 
 ```
