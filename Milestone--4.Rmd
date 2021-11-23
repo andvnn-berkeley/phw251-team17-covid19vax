@@ -224,7 +224,7 @@ tm_shape(ca_covid) +
   tm_compass(type = "8star", 
              position = c("left", "bottom")) +
   tm_layout(scale = 1, 
-            title = "Rates of full vaccination in California, by county",
+            title = "Percent of population fully vaccinated in California, by county",
             frame.lwd = 0,
             inner.margins = 0.1,
             legend.position = c("right", "top")) +
