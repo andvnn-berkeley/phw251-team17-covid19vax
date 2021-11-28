@@ -13,8 +13,16 @@ library(tidyverse)
 library(lubridate)
 library(knitr)
 library(kableExtra)
+library("sf")
+library("sp")
+library("spData")
+library("dplyr")
+library("ggplot2")
+library("USAboundaries")
+library("tmap")
 
 ```
+
 ```{r import statement, echo=FALSE}
 # from Milestone #2
 file_path_vax <- 
@@ -87,23 +95,13 @@ vaccinated / population 5+ (at county level)
 administration dataset using key variable "county". 
 
 
-Our final clean dataset needed to undergo mean imputation before our new 
-variables are created, which was performed next. 
-
-
-New Variables Created
-
-|Variable | Definition|
---------------|------------------------
-|Percentage fully vaccinated | Number of eligible people fully vaccinated (2+ doses for mRNA vaccine, 1 dose for adenovirus vaccine) divided by number of persons 12+|
-|Percent partially vaccinated | Number of eligible people partially vaccination (1 dose for mRNA vaccine) divide by number of persons 12+|
-
 ```{r subset latest data, echo=FALSE}
 vax_latest <- vax %>%
   mutate(date = as_date(as_of_date)) %>%
   filter(date == max(date)) %>%
   select( - as_of_date)
 ```
+
 ```{r mean imputation,  echo=FALSE}
 #aggregate county-level counts + %s for vaccination
 vax_temp <- vax_latest %>%
@@ -149,20 +147,13 @@ vax_aggregate <- vax_temp %>%
          county_eligible_pop) %>%
   filter(county_partial_2 != 0)
 ```
+
 ```{r merging datasets, echo=FALSE}
 #Merging both county and vax_latest dataset
 county <- county %>%
   rename(county = name)
-data <- left_join(vax_aggregate, county, by="county") 
+data <- left_join(vax_aggregate, county, by="county")
 ```
-\newpage 
-
-**Visualizations** 
-
-The Table, "Vaccination Rates for Caliornia Counties," displays the partial vaccinated rate, fully vaccinated rate, 
-total eligible population, and median age of each county in California. 
-The summarized average rates, total eligible population, and median age for the 
-entire state of California is calculated and presented at the top of the table.
 
 ```{r table data setup,echo=FALSE}
 # final clean data
@@ -178,6 +169,13 @@ clean_data <- data %>%
          Median_Age = round(Median_Age, digits = 0)) %>% 
   arrange(County)
 ```
+\newpage 
+
+**Visualizations** 
+
+The Table, "Vaccination Rates for Caliornia Counties," displays the partial vaccinated rate, fully vaccinated rate, total eligible population, and median age of each county in California. 
+The summarized average rates, total eligible population, and median age for the 
+entire state of California is calculated and presented at the top of the table.
 ```{r kable; table 1, echo=FALSE}
 # table with descriptive statistics (averages calculated for CA as a whole) and 4 data elements
 kable(clean_data, 
@@ -198,6 +196,7 @@ kable(clean_data,
       bold = T) %>%
       kable_styling(latex_options = c("striped", "scale_down")) 
 ```
+
 \newpage 
 The scatterplot, "Percentage of Fully Vaccinated Californians by Median Age, 2021," shows the rate of fully vaccinated individuals stratified by median age of California residents, as measured from California Department of Public Health’s latest online data repository for COVID-19. A trend line was fitted to follow the points on the plot, and a general trend of increasing fully vaccinated rates can be seen near the median age of 36-38.
 
@@ -215,12 +214,39 @@ ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
 
 The map shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each. 
 ```{r Map, echo=FALSE}
-## Map of vaccination rates,  by County
+
 #get CA boundary with high definition
 #ca <- USAboundaries::us_states(resolution = "high", states = "CA")
+
 #CA county boundary
+ca_co <- USAboundaries::us_counties(resolution = "high", states = "CA") %>%
+  select(- state_name)
+
+#Join dataset with sf polygon
+clean_data_rename <- clean_data %>%
+  rename(name = County)
+
+ca_covid <- dplyr::left_join(clean_data_rename, ca_co, by = "name")
+
+#Make joined dataset into sf object
+ca_covid <- st_as_sf(ca_covid, sf_column_name = "geometry")
+
+#Create plot
+legend_title = " "
+tm_shape(ca_covid) + 
+  tm_fill(col = "Fully_Vax_Rate", 
+          title = legend_title) +
+  tm_compass(type = "8star", 
+             position = c("left", "bottom")) +
+  tm_layout(scale = 1, 
+            title = "Percent of population fully vaccinated in California, by county",
+            frame.lwd = 0,
+            inner.margins = 0.1,
+            legend.position = c("right", "top")) +
+  tm_credits("Data Source: California Department of Health")
 ```
 \newpage 
+
 **Results** 
 
 Our analyses and data visualization shows that the highest vaccination rates 
@@ -245,6 +271,4 @@ According to our results, the minimum median age of persons receiving COVID-19
 Vaccination in the state of California is 30, for Merced county. The maximum age 
 was found to be 51 in Sierra county. The overall median for the state of 
 California is 38. A wide range of ages was seen in the overall analysis. 
-
-
 
