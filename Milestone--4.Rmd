@@ -203,13 +203,16 @@ ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
   geom_point() +
   geom_smooth(col = "navy blue", size = 0.5) + 
   scale_y_continuous(limits=c(0, 100)) +
-  labs(x= "Median age", y= "Rate(s) of full vaccination", title= "Percentage of Fully Vaccinated Californians by Median Age, 2021", caption = caption )
+  labs(x= "Median age", 
+       y= "Rate(s) of full vaccination", 
+       title= "Percentage of Fully Vaccinated Californians by Median Age, 2021", 
+       caption = caption )
          
 ```
 The scatterplot above shows the rate of fully vaccinated individuals stratified by median age of California residents, as measured from California Department of Public Health's latest online data repository for COVID-19. A trend line was fitted to follow the points on the plot, and a general trend of increasing fully vaccinated rates can be seen near the median age of 36-38.
 
 \newpage
-# Map of vaccination rates,  by County
+# Map of vaccination rates and median age, by County
 ```{r Map}
 
 #get CA boundary with high definition
@@ -258,7 +261,11 @@ tm_shape(ca_covid) +
             legend.position = c("right", "top")) +
   tm_credits(caption, size = 0.5)
 ```
-The map above shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each.
+The map above shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each. A second map shows the median age of each country, symbolized by a purple color ramp (younger to older median age going from light purple to darker purple). The five-step color ramp ranges from 30 to 55, with each step covering five years of age.
+
+
+\newpage
+# Vaccination rates over time (2021), by vaccine equity metric quartiles
 
 ```{r}
 #data per day at ZIP code level -> want state-wide totals per day 
@@ -292,7 +299,9 @@ vax_longitudinal <- read.csv(file_path_vax) %>%
 
 vax_long_agg <- vax_longitudinal %>%
   group_by(as_of_date, vaccine_equity_metric_quartile) %>%
-  summarize(percent_full_vem = sum(persons_fully_vaccinated, na.rm = T)/sum(age5_plus_population, na.rm = T)) %>%
+  summarize(percent_full_vem = 
+              sum(persons_fully_vaccinated, na.rm = T)/
+              sum(age5_plus_population, na.rm = T)) %>%
   ungroup() %>%
   filter(is.na(vaccine_equity_metric_quartile) == FALSE) %>%
   mutate(date = as.Date.character(as_of_date)) %>%
@@ -302,10 +311,13 @@ vax_long_agg <- vax_longitudinal %>%
 ggplot(data = vax_long_agg, aes(x = date, y = percent_full_vem)) +
   geom_point(stat = "identity", aes(col = vaccine_equity_metric_quartile)) +
   theme_classic() +
-  labs(x = "Date", y = "Percent fully vaccinated", title = "Rates of full vaccination across Vaccine Equity Metric Quartiles", caption = caption) +
+  labs(x = "Date", 
+       y = "Percent fully vaccinated", 
+       title = "Rates of full vaccination across Vaccine Equity Metric Quartiles", caption = caption) +
   guides(color=guide_legend(title="Vaccine Equity Metric Quartiles")) +
-  scale_color_continuous(labels = c("1 - Least Disadvantaged", "2", "3", "4 - Most Disadvantaged")) +
+  scale_color_continuous(labels = 
+                           c("1 - Least Disadvantaged", "2", "3", "4 - Most Disadvantaged")) +
   scale_y_continuous(labels = scales::percent)
 
 ```
-
+The visualization above is points plotted by month and percent of full vaccination in aggregate ZIP codes falling under four categories of the Vaccine Equity Metric (VEM) quartiles, which is based on demographic indicators of socioeconomic disadvantage and health vulnerability (where 1 is least disadvantaged/vulnerable and 4 and most disadvantaged/vulnerable). It can be seen that rates of vaccination follow, from highest to lowest, the order of vulnerability, from least to most -- suggesting areas of improvement for equitable vaccine delivery. 
