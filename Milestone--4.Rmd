@@ -64,6 +64,17 @@ vax_latest <- vax %>%
   mutate(date = as_date(as_of_date)) %>%
   filter(date == max(date)) %>%
   select( - as_of_date)
+
+
+#get latest date and convert into character for use in plot captions
+date <- vax %>%
+  mutate(date = as.Date.character(as_of_date)) %>%
+  select(- as_of_date)
+
+current_date <- as.Date(max(date$date))
+current_date_chr <- as.character(current_date)
+
+caption <- paste("Source: California Department of Health, current to", current_date_chr)
 ```
 
 
@@ -191,7 +202,7 @@ ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
   geom_point() +
   geom_smooth(col = "navy blue", size = 0.5) + 
   scale_y_continuous(limits=c(0, 100)) +
-  labs(x= "Median age", y= "Rate(s) of full vaccination", title= "Percentage of Fully Vaccinated Californians by Median Age, 2021", caption="Data Source: California Department of Public Health")
+  labs(x= "Median age", y= "Rate(s) of full vaccination", title= "Percentage of Fully Vaccinated Californians by Median Age, 2021", caption = caption )
          
 ```
 The scatterplot above shows the rate of fully vaccinated individuals stratified by median age of California residents, as measured from California Department of Public Health's latest online data repository for COVID-19. A trend line was fitted to follow the points on the plot, and a general trend of increasing fully vaccinated rates can be seen near the median age of 36-38.
@@ -223,13 +234,14 @@ tm_shape(ca_covid) +
           title = legend_title,
           labels = c('20-30%','30-40%','40-50%','50-60%', '60-70%', '70-80%', '80-90%')) +
   tm_compass(type = "8star", 
-             position = c("left", "bottom")) +
+             position = c("left", "bottom"),
+             size = 2) +
   tm_layout(scale = 1, 
             title = "Percent of population fully vaccinated in California, by county",
             frame.lwd = 0,
             inner.margins = 0.1,
             legend.position = c("right", "top")) +
-  tm_credits("Data Source: California Department of Health")
+  tm_credits(caption, size = 0.5)
 ```
 The map above shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each.
 
@@ -275,7 +287,7 @@ vax_long_agg <- vax_longitudinal %>%
 ggplot(data = vax_long_agg, aes(x = date, y = percent_full_vem)) +
   geom_point(stat = "identity", aes(col = vaccine_equity_metric_quartile)) +
   theme_classic() +
-  labs(x = "Date", y = "Percent fully vaccinated", title = "Rates of full vaccination across Vaccine Equity Metric Quartiles") +
+  labs(x = "Date", y = "Percent fully vaccinated", title = "Rates of full vaccination across Vaccine Equity Metric Quartiles", caption = caption) +
   guides(color=guide_legend(title="Vaccine Equity Metric Quartiles")) +
   scale_color_continuous(labels = c("1 - Least Disadvantaged", "2", "3", "4 - Most Disadvantaged")) +
   scale_y_continuous(labels = scales::percent)
