@@ -232,3 +232,51 @@ tm_shape(ca_covid) +
 ```
 The map above shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each.
 
+```{r}
+#data per day at ZIP code level -> want state-wide totals per day 
+vax_longitudinal <- read.csv(file_path_vax) %>%
+  group_by(county) %>%
+  mutate(county_partial = 
+           sum(persons_partially_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm =T),
+         county_fully = 
+           sum(persons_fully_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm = T)) %>%
+  ungroup() %>%
+  mutate(persons_partially_vaccinated_2 = 
+           ifelse(is.na(persons_partially_vaccinated), 
+                  age5_plus_population*county_partial,
+                  persons_partially_vaccinated),
+         persons_fully_vaccinated_2 = 
+           ifelse(is.na(persons_fully_vaccinated),
+                  age5_plus_population*county_fully, 
+                  persons_fully_vaccinated)) %>%
+   group_by(county) %>%
+  mutate(county_partial_2 = 
+           sum(persons_partially_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm =T),
+         county_fully_2 = 
+           sum(persons_fully_vaccinated, na.rm = T)/
+           sum(age5_plus_population, na.rm = T),
+         county_eligible_pop = 
+           sum(age5_plus_population, na.rm = T)) %>%
+  ungroup()
+
+vax_long_agg <- vax_longitudinal %>%
+  group_by(as_of_date, vaccine_equity_metric_quartile) %>%
+  summarize(percent_full_vem = sum(persons_fully_vaccinated, na.rm = T)/sum(age5_plus_population, na.rm = T)) %>%
+  ungroup() %>%
+  filter(is.na(vaccine_equity_metric_quartile) == FALSE) %>%
+  mutate(date = as.Date.character(as_of_date)) %>%
+  select(- as_of_date)
+
+
+ggplot(data = vax_long_agg, aes(x = date, y = percent_full_vem)) +
+  geom_point(stat = "identity", aes(col = vaccine_equity_metric_quartile)) +
+  theme_classic() +
+  labs(x = "Date", y = "Percent fully vaccinated", title = "Rates of full vaccination across Vaccine Equity Metric Quartiles") +
+  guides(color=guide_legend(title="Vaccine Equity Metric Quartiles")) +
+  scale_color_continuous(labels = c("1 - Least Disadvantaged", "2", "3", "4 - Most Disadvantaged"))
+
+```
+
