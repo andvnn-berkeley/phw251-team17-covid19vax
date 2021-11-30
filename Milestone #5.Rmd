@@ -1,8 +1,10 @@
 ---
-title: 'Milestone #5'
+title: 'Team Presentation: COVID-19 Vaccinations in California'
 author: "Saira Mayet, Jessica Pak, Andrew Nguyen"
 date: "11/24/2021"
-output: pdf_document
+output:
+  slidy_presentation: default
+  beamer_presentation: default
 ---
 
 ```{r setup, include=FALSE}
@@ -52,7 +54,7 @@ current_date_chr <- as.character(current_date)
 
 caption <- paste("Source: California Department of Health, current to", current_date_chr)
 ```
-**Project Statement** 
+**Project Problem Statement** 
 
 We are monitoring COVID-19 vaccination rates among counties in California and 
 in relation to age. Specifically, we are interested in whether there is any 
@@ -61,6 +63,8 @@ level. Utilizing two datasets, the California Census Data and the COVID-19
 Vaccine Progress Dashboard, we intend on exploring, analyzing, and visualizing
 vaccination rates at the county level and the relationship between age and 
 vaccination rate.
+
+---
 
 **Methods** 
 
@@ -77,32 +81,39 @@ household size, etc.) for each California county, most recently updated in
 September 2021. This dataset was rehosted on Avery Richard’s GitHub, and is 
 sourced from Census data.
 
-Partial subsetting of data was initially completed to keep the following 
-variables in each dataset: 
+The third dataset, or data object, was a shapefile of the state of California and its county boundaries, available in the USABoundaries R library.
 
+---
 
-***COVID-19 Vaccination Dashboard***: Date, Zip Code, County, Population 5+, Number of
-Persons Fully Vaccinated, Number of Persons Partially Vaccinated 
+**Data Cleaning & New Variable Calculations**
 
-***County Census Data***: Name, Median Age 
+Variables kept from each source:
 
-\newpage 
-**New Variables**
+COVID-19 Vaccination Dashboard: Date, Zip Code, County, Population 5+, Number of
+Persons Fully Vaccinated, Number of Persons Partially Vaccinated, Vaccine Equity Metric Quartile 
 
-After subsetting the data from both sources, the data were cleaned and new 
+County Census Data: Name, Median Age 
+
+Geographic Shapefile Data: Geometry
+
+---
+
+After subsetting the data from all sources, the data were cleaned and new 
 variables were created. 
-
 
 Data Cleaning
 
 1. Mean imputation: county-level means of fully and partially vaccinated that 
 will be used to replace NA values in dataset
-2. Percent eligible population partially vaccinated = # of persons partially 
+2. Merging relational data: county demographic dataset with vaccine 
+administration dataset using key variable "county", merging county-level aggregate data with geographic shapefiles 
+
+New Variables
+
+1. Percent eligible population partially vaccinated = # of persons partially 
 vaccinated / population 5+ (at county level)
-3. Percent eligible population fully vaccination = # of persons fully vaccinated 
+2. Percent eligible population fully vaccination = # of persons fully vaccinated 
 / population 5+ (at county level)
-4. Merging relational data: county demographic dataset with vaccine 
-administration dataset using key variable "county". 
 
 
 ```{r subset latest data, echo=FALSE}
@@ -181,9 +192,11 @@ clean_data <- data %>%
 ```
 \newpage 
 
-**Visualizations** 
+---
 
-The Table, "Vaccination Rates for Caliornia Counties," displays the partial vaccinated rate, fully vaccinated rate, total eligible population, and median age of each county in California. 
+**Visualizations: Table** 
+
+The Table, "Vaccination Rates for California Counties," displays the partial vaccinated rate, fully vaccinated rate, total eligible population, and median age of each county in California. 
 The summarized average rates, total eligible population, and median age for the 
 entire state of California is calculated and presented at the top of the table.
 ```{r kable; table 1, echo=FALSE}
@@ -208,6 +221,11 @@ kable(clean_data,
 ```
 
 \newpage 
+
+---
+
+**Visualizations: Scatterplot** 
+
 The scatterplot, "Percentage of Fully Vaccinated Californians by Median Age, 2021," shows the rate of fully vaccinated individuals stratified by median age of California residents, as measured from California Department of Public Health’s latest online data repository for COVID-19. A trend line was fitted to follow the points on the plot, and a general trend of increasing fully vaccinated rates can be seen near the median age of 36-38.
 
 ```{r age vs. full vaccination rate plot, echo=FALSE}
@@ -221,6 +239,11 @@ ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
        California Department of Public Health") + theme_classic()
 ```
 \newpage 
+
+---
+
+**Visualizations: Maps** 
+
 
 The map shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each. A second map shows the median age of each country, symbolized by a purple color ramp (younger to older median age going from light purple to darker purple). The five-step color ramp ranges from 30 to 55, with each step covering five years of age. 
 
@@ -276,8 +299,12 @@ tm_shape(ca_covid) +
 
 \newpage 
 
+---
+
+**Visualizations: Longitudinal Plot** 
+
 This last visualization features points plotted by month and percent of full vaccination in aggregate ZIP codes falling under four categories of the Vaccine Equity Metric (VEM) quartiles, which is based on demographic indicators of socioeconomic disadvantage and health vulnerability (where 1 is least disadvantaged/vulnerable and 4 and most disadvantaged/vulnerable). 
-```{r}
+```{r longitudinal, echo=FALSE}
 #get data per day at ZIP code level
 vax_longitudinal <- read.csv(file_path_vax) %>%
   group_by(county) %>%
@@ -333,7 +360,10 @@ ggplot(data = vax_long_agg, aes(x = date, y = percent_full_vem)) +
 ```
 
 \newpage
-**Results** 
+
+---
+
+**Interpretation of Results** 
 
 Our analyses and data visualization shows that the highest vaccination rates 
 were seen among the age group between 35-40. The general trend seen for this age
@@ -344,6 +374,16 @@ Outliers were seen with higher rates of vaccination, approximately 85% for a
 median age of 44. Outliers were also found for lower rates of vaccination of 
 approximately 25% for the median age of 37. 
 
+According to our results, the minimum median age of persons receiving COVID-19
+Vaccination in the state of California is 30, for Merced county. The maximum median age was found to be 51 in Sierra county. The overall median for the state of 
+California is 38. A wide range of ages was seen in the overall analysis. 
+
+---
+
+**Interpretation of Results** 
+
+Overall, there does not seem to be a strong linear relationship between median age and rates of full vaccination across California counties. Further statistical analysis would be needed to establish a robust correlative relationship between the two.
+
 In terms of geography, higher vaccination rates were seen in counties such as 
 San Francisco, Santa Clara, and Marin county with full vaccination rates at or 
 above 80% and median ages of 38, 36, 44, respectively.  Trailing behind are the 
@@ -352,10 +392,28 @@ counties of  Alameda, Contra Costa, Imperial, and San Mateo with median ages of,
 
 In terms of demographic indicators, it can be seen that rates of vaccination follow, from highest to lowest, the order of vulnerability derived from the Vaccine Equity Metric (VEM), from least to most -- suggesting areas of improvement for equitable vaccine delivery. The aggregate of the least disadvantaged areas (VEM group 4) sees vaccination rates of  77%, whereas the most disadvantaged areas (VEM group 1) trails behind at 59%. 
 
-**Discussion**
+---
 
-According to our results, the minimum median age of persons receiving COVID-19
-Vaccination in the state of California is 30, for Merced county. The maximum age 
-was found to be 51 in Sierra county. The overall median for the state of 
-California is 38. A wide range of ages was seen in the overall analysis. 
+**Challenges**
+
+***Understanding and addressing confusing data***
+
+Some ZIPs had abnormally high vaccination totals compared to their population totals (sometimes having rates higher than 100%); we had to better understand where this data anomaly came from (e.g. some people chose to vaccinate outside of their home ZIP, therefore seemingly inflating numbers) and how to address it. In the end, no observations were removed due to this issue. rather, we aggregated vaccination numbers at the county level, acknowledging that the vaccinated population is still captured accurately at a larger geography in comparison to the total population.
+    
+***Working with a live dataset***
+
+Changes in column names, vaccination eligible age, and temporality of data provided an extra layer of consideration when we were devising code that could be replicable and current to the updating dataset without maintenance. We addressed this by creating variables that returned the latest date using the _lubridate_ package to ensure the results and visualizations would be up-to-date every time the .rmd was ran without manual user intervention.
+    
+---
+
+**Something new we learned**
+
+***Making maps with R*** 
+
+The process of making maps with R is greatly simplified with the ability to treat geographic objects (shapefiles) as dataframes and/or dplyr-compatible tibbles. This meant that county-level data was easily appended to geographic geometry. The process of visualizing this data drew heavily upon the coursework in visualization (e.g. ggplot, table creation) and was intuitive.
+    
+***Making HTML slides with R***
+
+Creation of visually-appealing and easy to navigate slidedecks through .rmd files with the slidy-presentation preset.
+    
 

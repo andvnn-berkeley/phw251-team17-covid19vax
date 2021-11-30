@@ -1,0 +1,362 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  ignorenonframetext,
+]{beamer}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+% Prevent slide breaks in the middle of a paragraph
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+  \centering
+  \begin{beamercolorbox}[sep=16pt,center]{part title}
+    \usebeamerfont{part title}\insertpart\par
+  \end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+  \centering
+  \begin{beamercolorbox}[sep=12pt,center]{part title}
+    \usebeamerfont{section title}\insertsection\par
+  \end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center]{part title}
+    \usebeamerfont{subsection title}\insertsubsection\par
+  \end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Milestone \#5},
+  pdfauthor={Saira Mayet, Jessica Pak, Andrew Nguyen},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\newif\ifbibliography
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Milestone \#5}
+\author{Saira Mayet, Jessica Pak, Andrew Nguyen}
+\date{11/24/2021}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}
+\textbf{Project Statement}
+
+We are monitoring COVID-19 vaccination rates among counties in
+California and in relation to age. Specifically, we are interested in
+whether there is any correlation between median age and vaccinated
+person prevalence at the county level. Utilizing two datasets, the
+California Census Data and the COVID-19 Vaccine Progress Dashboard, we
+intend on exploring, analyzing, and visualizing vaccination rates at the
+county level and the relationship between age and vaccination rate.
+\end{frame}
+
+\begin{frame}
+\textbf{Methods}
+
+Of the two datasets of interest, the first describes COVID-19
+vaccination administration across the state of California. This is
+sourced from the California Open Data Portal for the California
+Department of Public Health. Relevant fields include date, zip code,
+county, and raw counts of vaccination status, among other population
+information. The dataset starts from January 5th, 2021 and is
+continually updated to reflect new changes in the data, most recently
+updated on November 23rd, 2021.
+
+The second dataset describes demographics (e.g.~population,
+race/ethnicity, age, household size, etc.) for each California county,
+most recently updated in September 2021. This dataset was rehosted on
+Avery Richard's GitHub, and is sourced from Census data.
+
+Partial subsetting of data was initially completed to keep the following
+variables in each dataset:
+\end{frame}
+
+\begin{frame}
+\textbf{\emph{COVID-19 Vaccination Dashboard}}: Date, Zip Code, County,
+Population 5+, Number of Persons Fully Vaccinated, Number of Persons
+Partially Vaccinated
+
+\textbf{\emph{County Census Data}}: Name, Median Age
+
+
+
+\textbf{New Variables}
+
+After subsetting the data from both sources, the data were cleaned and
+new variables were created.
+
+Data Cleaning
+
+\begin{enumerate}
+\tightlist
+\item
+  Mean imputation: county-level means of fully and partially vaccinated
+  that will be used to replace NA values in dataset
+\item
+  Percent eligible population partially vaccinated = \# of persons
+  partially vaccinated / population 5+ (at county level)
+\item
+  Percent eligible population fully vaccination = \# of persons fully
+  vaccinated / population 5+ (at county level)
+\item
+  Merging relational data: county demographic dataset with vaccine
+  administration dataset using key variable ``county''.
+\end{enumerate}
+
+
+\end{frame}
+
+\begin{frame}
+\textbf{Visualizations}
+
+The Table, ``Vaccination Rates for California Counties,'' displays the
+partial vaccinated rate, fully vaccinated rate, total eligible
+population, and median age of each county in California. The summarized
+average rates, total eligible population, and median age for the entire
+state of California is calculated and presented at the top of the table.
+
+\begin{table}
+
+\caption{\label{tab:kable; table 1}Vaccination Rates for California Counties}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{ccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{California}} & \multicolumn{1}{c}{\textbf{6.97}} & \multicolumn{1}{c}{\textbf{62.8}} & \multicolumn{1}{c}{\textbf{33,330,578}} & \multicolumn{1}{c}{\textbf{38}} \\
+\cmidrule(l{3pt}r{3pt}){1-1} \cmidrule(l{3pt}r{3pt}){2-2} \cmidrule(l{3pt}r{3pt}){3-3} \cmidrule(l{3pt}r{3pt}){4-4} \cmidrule(l{3pt}r{3pt}){5-5}
+County Name & Partially Vaccinated Rate & Fully Vaccinated Rate & Total Eligible Population & Median Age\\
+\midrule
+\cellcolor{gray!6}{Alameda} & \cellcolor{gray!6}{7.67} & \cellcolor{gray!6}{77.67} & \cellcolor{gray!6}{1,565,553} & \cellcolor{gray!6}{37}\\
+Alpine & 6.07 & 49.55 & 890 & 46\\
+\cellcolor{gray!6}{Amador} & \cellcolor{gray!6}{9.53} & \cellcolor{gray!6}{53.57} & \cellcolor{gray!6}{37,067} & \cellcolor{gray!6}{48}\\
+Butte & 5.08 & 48.35 & 213,817 & 37\\
+\cellcolor{gray!6}{Calaveras} & \cellcolor{gray!6}{7.71} & \cellcolor{gray!6}{50.89} & \cellcolor{gray!6}{43,656} & \cellcolor{gray!6}{49}\\
+\addlinespace
+Colusa & 6.52 & 56.52 & 20,153 & 34\\
+\cellcolor{gray!6}{Contra Costa} & \cellcolor{gray!6}{6.67} & \cellcolor{gray!6}{79.19} & \cellcolor{gray!6}{1,071,086} & \cellcolor{gray!6}{38}\\
+Del Norte & 5.85 & 41.91 & 25,963 & 39\\
+\cellcolor{gray!6}{El Dorado} & \cellcolor{gray!6}{6.12} & \cellcolor{gray!6}{58.07} & \cellcolor{gray!6}{179,821} & \cellcolor{gray!6}{44}\\
+Fresno & 7.60 & 57.96 & 911,080 & 31\\
+\addlinespace
+\cellcolor{gray!6}{Glenn} & \cellcolor{gray!6}{4.93} & \cellcolor{gray!6}{51.96} & \cellcolor{gray!6}{26,204} & \cellcolor{gray!6}{35}\\
+Humboldt & 7.09 & 60.64 & 128,806 & 37\\
+\cellcolor{gray!6}{Imperial} & \cellcolor{gray!6}{18.50} & \cellcolor{gray!6}{78.11} & \cellcolor{gray!6}{161,453} & \cellcolor{gray!6}{32}\\
+Inyo & 6.95 & 51.77 & 18,268 & 46\\
+\cellcolor{gray!6}{Kern} & \cellcolor{gray!6}{6.78} & \cellcolor{gray!6}{50.75} & \cellcolor{gray!6}{818,823} & \cellcolor{gray!6}{31}\\
+\addlinespace
+Kings & 6.32 & 42.09 & 137,655 & 31\\
+\cellcolor{gray!6}{Lake} & \cellcolor{gray!6}{6.41} & \cellcolor{gray!6}{53.28} & \cellcolor{gray!6}{60,336} & \cellcolor{gray!6}{45}\\
+Lassen & 3.06 & 25.48 & 26,919 & 37\\
+\cellcolor{gray!6}{Los Angeles} & \cellcolor{gray!6}{8.57} & \cellcolor{gray!6}{68.58} & \cellcolor{gray!6}{9,463,365} & \cellcolor{gray!6}{35}\\
+Madera & 6.92 & 51.34 & 143,316 & 33\\
+\addlinespace
+\cellcolor{gray!6}{Marin} & \cellcolor{gray!6}{9.11} & \cellcolor{gray!6}{81.77} & \cellcolor{gray!6}{246,959} & \cellcolor{gray!6}{44}\\
+Mariposa & 20.18 & 44.59 & 15,319 & 49\\
+\cellcolor{gray!6}{Mendocino} & \cellcolor{gray!6}{8.42} & \cellcolor{gray!6}{64.33} & \cellcolor{gray!6}{81,751} & \cellcolor{gray!6}{42}\\
+Merced & 11.18 & 49.56 & 248,786 & 30\\
+\cellcolor{gray!6}{Modoc} & \cellcolor{gray!6}{3.36} & \cellcolor{gray!6}{36.87} & \cellcolor{gray!6}{9,384} & \cellcolor{gray!6}{46}\\
+\addlinespace
+Mono & 7.68 & 67.53 & 12,259 & 37\\
+\cellcolor{gray!6}{Monterey} & \cellcolor{gray!6}{8.38} & \cellcolor{gray!6}{68.41} & \cellcolor{gray!6}{387,591} & \cellcolor{gray!6}{33}\\
+Napa & 9.25 & 72.79 & 133,221 & 40\\
+\cellcolor{gray!6}{Nevada} & \cellcolor{gray!6}{7.43} & \cellcolor{gray!6}{57.45} & \cellcolor{gray!6}{92,519} & \cellcolor{gray!6}{48}\\
+Orange & 6.94 & 69.62 & 2,986,910 & 36\\
+\addlinespace
+\cellcolor{gray!6}{Placer} & \cellcolor{gray!6}{6.24} & \cellcolor{gray!6}{65.71} & \cellcolor{gray!6}{367,860} & \cellcolor{gray!6}{40}\\
+Plumas & 5.25 & 51.57 & 19,548 & 50\\
+\cellcolor{gray!6}{Riverside} & \cellcolor{gray!6}{6.85} & \cellcolor{gray!6}{57.00} & \cellcolor{gray!6}{2,255,664} & \cellcolor{gray!6}{34}\\
+Sacramento & 6.85 & 64.32 & 1,427,122 & 35\\
+\cellcolor{gray!6}{San Benito} & \cellcolor{gray!6}{8.23} & \cellcolor{gray!6}{66.00} & \cellcolor{gray!6}{55,001} & \cellcolor{gray!6}{34}\\
+\addlinespace
+San Bernardino & 6.14 & 54.69 & 1,991,511 & 32\\
+\cellcolor{gray!6}{San Diego} & \cellcolor{gray!6}{11.86} & \cellcolor{gray!6}{69.67} & \cellcolor{gray!6}{3,101,086} & \cellcolor{gray!6}{35}\\
+San Francisco & 7.48 & 80.65 & 835,425 & 38\\
+\cellcolor{gray!6}{San Joaquin} & \cellcolor{gray!6}{9.36} & \cellcolor{gray!6}{58.80} & \cellcolor{gray!6}{688,728} & \cellcolor{gray!6}{33}\\
+San Luis Obispo & 6.71 & 58.63 & 268,922 & 39\\
+\addlinespace
+\cellcolor{gray!6}{San Mateo} & \cellcolor{gray!6}{8.05} & \cellcolor{gray!6}{79.03} & \cellcolor{gray!6}{696,222} & \cellcolor{gray!6}{39}\\
+Santa Barbara & 8.02 & 65.44 & 417,143 & 34\\
+\cellcolor{gray!6}{Santa Clara} & \cellcolor{gray!6}{7.22} & \cellcolor{gray!6}{80.93} & \cellcolor{gray!6}{1,833,854} & \cellcolor{gray!6}{36}\\
+Santa Cruz & 6.57 & 70.67 & 278,046 & 37\\
+\cellcolor{gray!6}{Shasta} & \cellcolor{gray!6}{6.23} & \cellcolor{gray!6}{44.58} & \cellcolor{gray!6}{161,537} & \cellcolor{gray!6}{42}\\
+\addlinespace
+Sierra & 3.15 & 47.53 & 2,632 & 51\\
+\cellcolor{gray!6}{Siskiyou} & \cellcolor{gray!6}{6.24} & \cellcolor{gray!6}{45.39} & \cellcolor{gray!6}{40,245} & \cellcolor{gray!6}{47}\\
+Solano & 9.68 & 63.57 & 414,116 & 37\\
+\cellcolor{gray!6}{Sonoma} & \cellcolor{gray!6}{7.18} & \cellcolor{gray!6}{72.45} & \cellcolor{gray!6}{475,030} & \cellcolor{gray!6}{40}\\
+Stanislaus & 8.95 & 54.98 & 505,820 & 33\\
+\addlinespace
+\cellcolor{gray!6}{Sutter} & \cellcolor{gray!6}{6.46} & \cellcolor{gray!6}{57.47} & \cellcolor{gray!6}{90,595} & \cellcolor{gray!6}{35}\\
+Tehama & 4.67 & 41.11 & 66,959 & 40\\
+\cellcolor{gray!6}{Trinity} & \cellcolor{gray!6}{6.01} & \cellcolor{gray!6}{42.55} & \cellcolor{gray!6}{12,260} & \cellcolor{gray!6}{49}\\
+Tulare & 7.06 & 51.48 & 420,906 & 30\\
+\cellcolor{gray!6}{Tuolumne} & \cellcolor{gray!6}{6.96} & \cellcolor{gray!6}{50.01} & \cellcolor{gray!6}{52,564} & \cellcolor{gray!6}{47}\\
+\addlinespace
+Ventura & 6.63 & 68.73 & 801,586 & 36\\
+\cellcolor{gray!6}{Yolo} & \cellcolor{gray!6}{8.69} & \cellcolor{gray!6}{67.09} & \cellcolor{gray!6}{204,789} & \cellcolor{gray!6}{30}\\
+Yuba & 5.54 & 48.39 & 69,526 & 32\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+The scatterplot, ``Percentage of Fully Vaccinated Californians by Median
+Age, 2021,'' shows the rate of fully vaccinated individuals stratified
+by median age of California residents, as measured from California
+Department of Public Health's latest online data repository for
+COVID-19. A trend line was fitted to follow the points on the plot, and
+a general trend of increasing fully vaccinated rates can be seen near
+the median age of 36-38.
+
+\begin{verbatim}
+## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+\end{verbatim}
+
+\includegraphics{Milestone--5_files/figure-beamer/age vs. full vaccination rate plot-1.pdf}
+\newpage 
+\end{frame}
+
+\begin{frame}
+The map shows the rates of full vaccination, by county, symbolized by a
+color ramp (from low to high rates of vaccination going from yellow to
+dark red). A color ramp was made with classes of 10 percent each. A
+second map shows the median age of each country, symbolized by a purple
+color ramp (younger to older median age going from light purple to
+darker purple). The five-step color ramp ranges from 30 to 55, with each
+step covering five years of age.
+
+\includegraphics{Milestone--5_files/figure-beamer/Map-1.pdf}
+\includegraphics{Milestone--5_files/figure-beamer/Map-2.pdf}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+This last visualization features points plotted by month and percent of
+full vaccination in aggregate ZIP codes falling under four categories of
+the Vaccine Equity Metric (VEM) quartiles, which is based on demographic
+indicators of socioeconomic disadvantage and health vulnerability (where
+1 is least disadvantaged/vulnerable and 4 and most
+disadvantaged/vulnerable).
+
+\begin{verbatim}
+## `summarise()` has grouped output by 'as_of_date'. You can override using the `.groups` argument.
+\end{verbatim}
+
+\includegraphics{Milestone--5_files/figure-beamer/longitudinal-1.pdf}
+
+
+\end{frame}
+
+\begin{frame}
+\textbf{Results}
+
+Our analyses and data visualization shows that the highest vaccination
+rates were seen among the age group between 35-40. The general trend
+seen for this age group exhibited a full vaccination rate of
+approximately 70-73\%, with rates seen above 75\% as well.
+
+Outliers were seen with higher rates of vaccination, approximately 85\%
+for a median age of 44. Outliers were also found for lower rates of
+vaccination of approximately 25\% for the median age of 37.
+
+In terms of geography, higher vaccination rates were seen in counties
+such as San Francisco, Santa Clara, and Marin county with full
+vaccination rates at or above 80\% and median ages of 38, 36, 44,
+respectively. Trailing behind are the counties of Alameda, Contra Costa,
+Imperial, and San Mateo with median ages of, 37, 38, 32, 39.
+
+In terms of demographic indicators, it can be seen that rates of
+vaccination follow, from highest to lowest, the order of vulnerability
+derived from the Vaccine Equity Metric (VEM), from least to most --
+suggesting areas of improvement for equitable vaccine delivery. The
+aggregate of the least disadvantaged areas (VEM group 4) sees
+vaccination rates of 77\%, whereas the most disadvantaged areas (VEM
+group 1) trails behind at 59\%.
+\end{frame}
+
+\begin{frame}
+\textbf{Discussion}
+
+According to our results, the minimum median age of persons receiving
+COVID-19 Vaccination in the state of California is 30, for Merced
+county. The maximum age was found to be 51 in Sierra county. The overall
+median for the state of California is 38. A wide range of ages was seen
+in the overall analysis.
+\end{frame}
+
+\end{document}
