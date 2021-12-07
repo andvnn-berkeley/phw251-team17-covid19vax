@@ -1,8 +1,10 @@
 ---
 title: 'Final Report: COVID-19 Vaccinations in California'
 author: "Jessica Pak, Saira Mayet, Andrew Nguyen"
-date: "12/13/2021"
-output: pdf_document
+date: "PH251: Fall Semester 2021"
+output: 
+  pdf_document:
+    latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE}
@@ -189,13 +191,12 @@ clean_data <- data %>%
   arrange(County)
 ```
 
-
+\newpage
 ## Visualizations: Table
 
 The Table, "Vaccination Rates for California Counties," displays the partial vaccinated rate, fully vaccinated rate, total eligible population, and median age of each county in California. 
 The summarized average rates, total eligible population, and median age for the 
 entire state of California is calculated and presented at the top of the table. Counties with the highest and lowest full-vaccination rates are highlighted in red.
-
 ```{r kable; table 1, echo=FALSE, warning = FALSE}
 # table with descriptive statistics (averages calculated for CA as a whole) and 4 data elements
 kable(clean_data, 
@@ -209,17 +210,20 @@ kable(clean_data,
       caption = "Vaccination Rates for California Counties",
       format.args=list(big.mark=",")) %>% 
       add_header_above(c("California"= 1,
-      "6.97"=1,
-      "62.8"=1,
-      "33,330,578"=1,
-      "38"=1),
+        "6.97"=1,
+        "62.8"=1,
+        "33,330,578"=1,
+        "38"=1),
       bold = T) %>%
-      kable_styling(latex_options = c("striped", "scale_down")) %>%
-  kable_styling(font_size = 7) %>% 
-  column_spec(1:5, color=if_else(clean_data$Fully_Vax_Rate == 25.67|clean_data$Fully_Vax_Rate == 82.24,"red","black","black")) %>% 
+      kable_styling(latex_options = c("striped")) %>%
+  kable_styling(font_size = 6) %>% 
+  column_spec(1:5, 
+              color=if_else(clean_data$Fully_Vax_Rate == 25.67|
+                            clean_data$Fully_Vax_Rate == 82.24,
+              "red","black","black")) %>% 
   footnote(
-    general="Number of vaccinations and eligible population by zipcode are from CDPH COVID-19 Vaccination Dashboard (live dashboard), median age of each county is from California census demographic data (2012)",
-    general_title="Table Data Source",
+    general="Number of vaccinations and eligible population by zipcode sourced from CDPH COVID-19 Vaccination Dashboard (live dashboard). Median age data sourced from California Census demographic data (2012)",
+    general_title="Table Data Source:",
     title_format=c("italic"),
     threeparttable=T
   ) 
@@ -349,9 +353,9 @@ ggplot(data = vax_long_agg, aes(x = date, y = percent_full_vem)) +
   labs(x = "Date", 
        y = "Percent fully vaccinated", 
        title = "Rates of full vaccination across Vaccine Equity Metric Quartiles", caption = caption) +
-  guides(color=guide_legend(title="Vaccine Equity Metric Quartiles")) +
+  guides(color=guide_legend(title="Vaccine Equity Metric Quartiles", reverse = TRUE)) +
   scale_color_continuous(labels = 
-                           c("1 - Most Disadvantaged", "2", "3", "4 - Least Disadvantaged")) +
+                           c("4 - Most Disadvantaged", "3", "2", "1 - Least Disadvantaged")) +
   scale_y_continuous(labels = scales::percent)
 
 ```
@@ -367,9 +371,13 @@ above 75% as well. Outliers were seen with higher rates of vaccination, approxim
 median age of 44. Outliers were also found for lower rates of vaccination of 
 approximately 25% for the median age of 37. According to our results, the minimum median age of persons receiving COVID-19 Vaccination in the state of California is 30, for Merced county. The maximum median age was found to be 51 in Sierra county. 
 
-Overall, in acknowledgement to our original problem statement, we were not able to conclude that there seems to be a strong linear relationship between median age and rates of full vaccination across California counties. Further statistical analysis would be needed to establish a robust correlative relationship between the two variables.
+Overall, in acknowledgement to our original problem statement, we were not able to conclude that there seems to be a strong linear relationship between median age and rates of full vaccination across the aggregation of all California counties. A stronger relationship may exist among more localized geographies, by county, or by urban centers (i.e. singular cities) that may have more similar sociodemographic and health-cultural characteristics -- this warrants additional stratified research for geography-specific purposes. 
 
-However, we explored other associations that may be interesting to follow up in future studies, including geography of vaccination rates in counties such as San Francisco, Santa Clara, and Marin county with high full vaccination rates at or above 80% and median ages of 38, 36, 44, respectively. In addition, it can be seen that rates of vaccination follow, from highest to lowest, the order of vulnerability derived from the Vaccine Equity Metric (VEM), from least to most -- suggesting areas of improvement for equitable vaccine delivery. The aggregate of the least disadvantaged areas (VEM group 4) sees vaccination rates of  77%, whereas the most disadvantaged areas (VEM group 1) trails behind at 59%. 
+If specific counties are interested in their populations' vaccination uptake in relation to age, we recommend utilizing the code used in this report to subset the data and re-analyze the relationship between median age and rates of full vaccination. It should provide an overarching exploratory analysis that could generate other hypotheses and analyses plans. We also recommend that this same report/study design be redone with ZIP-level data, which would be more specific and robust (if data are available). Overall, further analysis and statistical testing would be needed to establish a robust correlative relationship between the two variables for the state of California within this study period (if any).
+
+We are not confident that these findings would be generalizable to other geographies and populations outside of California. Even if other counties, states, or countries had similar sociodemographic characteristics, there may exist a variety of unknown cultural and geographic-specific factors that may affect health behaviors such as vaccination and thus render these aggregate results incompatible for application. Furthermore, a large limitation in our data is in how the median age data is sourced from 2012. Although it is plausible that the age structure of the state did not drastically change in the past decade, it is still undeniably outdated. 
+
+We explored other associations that may be interesting to follow up in future studies, including geography of vaccination rates in counties such as San Francisco, Santa Clara, and Marin county with high full vaccination rates at or above 80% and median ages of 38, 36, 44, respectively. In addition, it can be seen that rates of vaccination follow, from highest to lowest, the order of vulnerability derived from the Vaccine Equity Metric (VEM), from least to most -- suggesting areas of improvement for equitable vaccine delivery. The aggregate of the least disadvantaged areas (VEM group 4) sees vaccination rates of 77%, whereas the most disadvantaged areas (VEM group 1) trails behind at 59%. 
 
 \newpage
 
@@ -378,7 +386,7 @@ However, we explored other associations that may be interesting to follow up in 
 
 ***Understanding and addressing confusing data***
 
-Some ZIPs had abnormally high vaccination totals compared to their population totals (sometimes having rates higher than 100%); we had to better understand where this data anomaly came from (e.g. some people chose to vaccinate outside of their home ZIP, therefore seemingly inflating numbers) and how to address it. In the end, no observations were removed due to this issue. rather, we aggregated vaccination numbers at the county level, acknowledging that the vaccinated population is still captured accurately at a larger geography in comparison to the total population.
+Some ZIPs had abnormally high vaccination totals compared to their population totals (sometimes having rates higher than 100%); we sought to better understand where this data anomaly came from (e.g. some people chose to vaccinate outside of their home ZIP, therefore seemingly inflating numbers) and how to address it. In the end, we did not remove any observations due to this issue. Rather, we aggregated vaccination numbers at the county level, acknowledging that the vaccinated population is still captured accurately at a larger geography in comparison to the total population.
     
 ***Working with a live dataset***
 
@@ -386,12 +394,16 @@ Changes in column names, vaccination eligible age, and temporality of data provi
     
 **Something new we learned**
 
+***Working with GitHub***
+
+Although this was not an entirely new process, we appreciated the ability to implement best practices for reproducibility and collaboration. Although there were challenges in the beginning with reconciling code changes when there were multiple commits, the process emphasized the importance of team communication and scheduling. 
+
 ***Making maps with R*** 
 
-The process of making maps with R is greatly simplified with the ability to treat geographic objects (shapefiles) as dataframes and/or dplyr-compatible tibbles. This meant that county-level data was easily appended to geographic geometry. The process of visualizing this data drew heavily upon the coursework in visualization (e.g. ggplot, table creation) and was intuitive.
+The process of making maps with R is greatly simplified with the ability to treat geographic objects (shapefiles) as dataframes and/or dplyr-compatible tibbles. This meant that county-level data was easily appended to geographic geometry. The process of visualizing this data drew heavily upon the coursework in visualization (e.g. ggplot, table creation) and felt intuitive.
     
 ***Making HTML slides with R***
 
-Creation of visually-appealing and easy to navigate slidedecks through .rmd files with the slidy-presentation preset.
-    
+Creation of visually-appealing and easy to navigate slidedecks through .rmd files with the slidy-presentation preset was another highlight of htis project. This process was extremely intuitive and satisfying -- we feel especially empowered to make more R-based presentations and reports in the future that are both reproducible, accessible, and aesthetically-pleasing.
+
 
