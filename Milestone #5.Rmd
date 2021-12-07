@@ -1,7 +1,7 @@
 ---
 title: 'Team Presentation: COVID-19 Vaccinations in California'
 author: "Saira Mayet, Jessica Pak, Andrew Nguyen"
-date: "11/24/2021"
+date: "11/30/2021"
 output:
   slidy_presentation: default
   beamer_presentation: default
@@ -277,11 +277,11 @@ tm_shape(ca_covid) +
   tm_layout(scale = 1, 
             title = "Percent of population fully vaccinated in California, by county",
             frame.lwd = 0,
-            inner.margins = 0.1,
-            legend.position = c("right", "top")) +
+            inner.margins = 0.1) +
+           # legend.position = c("right", "top")) +
   tm_credits(caption, size = 0.5)
 
-#Create second map
+#Create second map of median age at county level
 tm_shape(ca_covid) + 
   tm_fill(col = "Median_Age", 
           title = legend_title,
@@ -294,7 +294,7 @@ tm_shape(ca_covid) +
             frame.lwd = 0,
             inner.margins = 0.1,
             legend.position = c("right", "top")) +
-  tm_credits(caption, size = 0.5)
+  tm_credits("Data current to 2012 (U.S. Census)", size = 0.5)
 ```
 
 \newpage 
@@ -354,7 +354,7 @@ ggplot(data = vax_long_agg, aes(x = date, y = percent_full_vem)) +
        title = "Rates of full vaccination across Vaccine Equity Metric Quartiles", caption = caption) +
   guides(color=guide_legend(title="Vaccine Equity Metric Quartiles")) +
   scale_color_continuous(labels = 
-                           c("1 - Least Disadvantaged", "2", "3", "4 - Most Disadvantaged")) +
+                           c("4 - Most Disadvantaged", "3", "2", "1 - Least Disadvantaged")) +
   scale_y_continuous(labels = scales::percent)
 
 ```
