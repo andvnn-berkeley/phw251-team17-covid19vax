@@ -234,7 +234,7 @@ kable(clean_data,
 
 The scatterplot, "Percentage of Fully Vaccinated Californians by Median Age, 2021," shows the rate of fully vaccinated individuals stratified by median age of California residents, as measured from California Department of Public Health’s latest online data repository for COVID-19. A trend line was fitted to follow the points on the plot, and a general trend of increasing fully vaccinated rates can be seen near the median age of 36-38.
 
-```{r age vs. full vaccination rate plot, echo=FALSE, warning = FALSE}
+```{r age vs. full vaccination rate plot, echo=FALSE, warning = FALSE, message=FALSE}
 # Scatterplot of Median Age vs Fully Vaccinated Rate
 
 ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
@@ -250,7 +250,7 @@ ggplot(data = clean_data, aes(x= Median_Age,y= Fully_Vax_Rate)) +
 
 The map shows the rates of full vaccination, by county, symbolized by a color ramp (from low to high rates of vaccination going from yellow to dark red). A color ramp was made with classes of 10 percent each. A second map shows the median age of each country, symbolized by a purple color ramp (younger to older median age going from light purple to darker purple). The five-step color ramp ranges from 30 to 55, with each step covering five years of age. 
 
-```{r Map, echo=FALSE, warning = FALSE}
+```{r Map, echo=FALSE, warning = FALSE, message = FALSE}
 
 #get CA boundary with high definition
 #ca <- USAboundaries::us_states(resolution = "high", states = "CA")
@@ -305,7 +305,8 @@ tm_shape(ca_covid) +
 ## Visualizations: Longitudinal Plot  
 
 This last visualization features points plotted by month and percent of full vaccination in aggregate ZIP codes falling under four categories of the Vaccine Equity Metric (VEM) quartiles, which is based on demographic indicators of socioeconomic disadvantage and health vulnerability (where 1 is least disadvantaged/vulnerable and 4 and most disadvantaged/vulnerable). 
-```{r longitudinal, echo=FALSE, warning = FALSE}
+
+```{r longitudinal, echo=FALSE, warning = FALSE, message = FALSE}
 #get data per day at ZIP code level
 vax_longitudinal <- read.csv(file_path_vax) %>%
   group_by(county) %>%
@@ -359,6 +360,7 @@ ggplot(data = vax_long_agg, aes(x = date, y = percent_full_vem)) +
   scale_y_continuous(labels = scales::percent)
 
 ```
+
 
 \newpage
 
