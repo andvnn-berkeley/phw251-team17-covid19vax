@@ -96,7 +96,7 @@ Name, Median Age
 Geographic Shapefile Data: 
 Geometry
 
-\  
+\newpage
 
 *After subsetting the data from all sources, the data were cleaned and new 
 variables were created.*
@@ -199,6 +199,10 @@ The summarized average rates, total eligible population, and median age for the
 entire state of California is calculated and presented at the top of the table. Counties with the highest and lowest full-vaccination rates are highlighted in red.
 ```{r kable; table 1, echo=FALSE, warning = FALSE}
 # table with descriptive statistics (averages calculated for CA as a whole) and 4 data elements
+
+data_min <- min(clean_data$Fully_Vax_Rate)
+data_max <- max(clean_data$Fully_Vax_Rate)
+
 kable(clean_data, 
       booktabs = T, 
       col.names = c("County Name", 
@@ -215,11 +219,10 @@ kable(clean_data,
         "33,330,578"=1,
         "38"=1),
       bold = T) %>%
-      kable_styling(latex_options = c("striped")) %>%
-  kable_styling(font_size = 6) %>% 
+  kable_styling(latex_options = c("striped"),
+                font_size = 6) %>%
   column_spec(1:5, 
-              color=if_else(clean_data$Fully_Vax_Rate == 25.67|
-                            clean_data$Fully_Vax_Rate == 82.24,
+              color = if_else(clean_data$Fully_Vax_Rate == data_min |clean_data$Fully_Vax_Rate == data_max,
               "red","black","black")) %>% 
   footnote(
     general="Number of vaccinations and eligible population by zipcode sourced from CDPH COVID-19 Vaccination Dashboard (live dashboard). Median age data sourced from California Census demographic data (2012)",
