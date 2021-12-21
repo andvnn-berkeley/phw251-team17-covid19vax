@@ -13,4 +13,4 @@ Datasets from:
 https://data.ca.gov/dataset/covid-19-vaccine-progress-dashboard-data-by-zip-code 
 https://raw.githubusercontent.com/Averysaurus/reproducable_examples-/main/ca_county_demographics.csv
 
-All work done in R Studio
+All work done in RStudio Version 1.4.1717
