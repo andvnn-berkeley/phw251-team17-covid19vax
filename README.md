@@ -1,8 +1,10 @@
 # phw251-team17
-Collaborative GitHub for PHW251 // Team 17 Fall 2021
+Collaborative GitHub for PHW251: R for Public Health // Team 17 Fall 2021
+
+Collaborative project was centered upon data wrangling, analysis and visualization from California Open Data Portal COVID-19 datasets. 
 
 PDF files are final reports of each milestone of project. 
-Milestone 6 is the final project report with cleaned datasets and data visualizations of COVID-19 vaccination rates for Caifornia counties.
+Milestone 6 is the final project report cleaned datasets and revised visualizations.
 
 Code (.Rmd) files that produced PDF files can be found in "code" directory.
 
